@@ -60,6 +60,12 @@ The data was profiled before choosing any thresholds:
   - weekly standard hours above 40 **are not**
 - This is an open question for the client (see QUESTIONS.md).
 
+## Employee table: plain averages, with flags alongside
+- The min / avg / max rate columns use the plain mean, as the brief asks for "average". A spike week does pull an employee's average up or down, but that is visible: the min or max column shows the outlier, and the "Flags" column shows that the row was flagged.
+- The "typical" rates on the summary cards use medians instead, because they describe the whole crew.
+- An employee's level and trade are taken from their first row. No one changes level or trade in this data; if an apprentice moved up mid-project, the table would show their starting level.
+- The table is a plain HTML table, with sorting done by `useState` plus `Array.sort` and no table library. Every column is a flat field on `EmployeeStats`, so a single comparison function sorts any column.
+
 ## Daily-hours stats only count days actually worked
 - Most weeks have days with 0 hours (weekends, days off). Including them would make every employee's minimum 0 and pull the average down.
 - Min, max and average hours per day are therefore computed over days with more than 0 hours.
@@ -88,3 +94,8 @@ The data was profiled before choosing any thresholds:
 - **Keys must not use `toISOString()`.** Dates are built in local time, so converting them with `toISOString()` can shift them a day in some timezones. Group by `weekEndingRaw` or `getTime()` instead.
 - **`level` is typed as plain text,** not `'APPRENTICE' | 'JOURNEYWORKER'`, even though the parser validates it.
 - **A file with a wrong or missing column** produces one "is blank" error per row instead of a single "missing column" message. **An empty file** produces no records and no issues.
+- **IDs are sorted as text** in the employee table, so "999" would sort after "1000". All IDs here have 4 digits.
+- **The table's group-header spans are counted by hand.** They must add up to the number of columns.
+- **`stats.ts` imports `canonicalNames` from `anomalies.ts`.** A shared identity helper would avoid the stats module depending on the rules module.
+- **The merge of parse issues and rule results lives in `App.tsx`,** not in a tested pure function. An `analyze(csvText)` function in `src/lib` would make it testable and give CSV upload one entry point.
+- **In development the CSV is fetched twice,** because React StrictMode runs effects twice in dev. Both fetches set the same state, so nothing breaks.

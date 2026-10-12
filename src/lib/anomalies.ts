@@ -1,3 +1,4 @@
+import { formatMoney } from './format'
 import { groupBy, median, roundHours } from './math'
 import {
   DAILY_HOURS_HIGH,
@@ -17,10 +18,6 @@ const DAY_LABELS: Record<Day, string> = {
   fri: 'Fri',
   sat: 'Sat',
   sun: 'Sun',
-}
-
-function money(amount: number): string {
-  return `$${amount.toFixed(2)}`
 }
 
 // Build an anomaly for one record, so every rule doesn't repeat the row details.
@@ -71,9 +68,9 @@ export function findRateDeviations(records: WeekRecord[]): Anomaly[] {
             row,
             'rate-deviation',
             'high',
-            `Standard rate ${money(row.standardRate)} is ${percent}% ${direction} ` +
-              `${names.get(employeeId)}'s typical ${money(typicalRate)} ` +
-              `(OT ${money(row.overtimeRate)}, benefits ${money(row.benefitsRate)})`,
+            `Standard rate ${formatMoney(row.standardRate)} is ${percent}% ${direction} ` +
+              `${names.get(employeeId)}'s typical ${formatMoney(typicalRate)} ` +
+              `(OT ${formatMoney(row.overtimeRate)}, benefits ${formatMoney(row.benefitsRate)})`,
           ),
         )
       }
@@ -108,8 +105,8 @@ export function findApprenticesPaidAboveJourneyworkers(records: WeekRecord[]): A
           row,
           'apprentice-over-journeyworker',
           'medium',
-          `Apprentice standard rate ${money(row.standardRate)} is above the typical ` +
-            `${row.occupation} journeyworker rate ${money(journeyworkerRate)}`,
+          `Apprentice standard rate ${formatMoney(row.standardRate)} is above the typical ` +
+            `${row.occupation} journeyworker rate ${formatMoney(journeyworkerRate)}`,
         ),
       )
     }
@@ -126,7 +123,7 @@ export function findOvertimeRateBelowStandard(records: WeekRecord[]): Anomaly[] 
         r,
         'ot-rate-below-st',
         'high',
-        `Overtime rate ${money(r.overtimeRate)} is lower than standard rate ${money(r.standardRate)}`,
+        `Overtime rate ${formatMoney(r.overtimeRate)} is lower than standard rate ${formatMoney(r.standardRate)}`,
       ),
     )
 }

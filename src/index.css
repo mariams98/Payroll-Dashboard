@@ -4,3 +4,107 @@ body {
   color: #1f2937;
   background: #f9fafb;
 }
+
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+h1 {
+  margin: 0 0 24px;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.note {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Summary cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.card-label {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.card-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.card-detail {
+  color: #6b7280;
+  font-size: 0.8125rem;
+}
+
+/* Tables */
+.table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+th,
+td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #f9fafb;
+}
+
+th.group-header {
+  text-align: center;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+th button {
+  all: unset;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+th button:focus-visible {
+  outline: 2px solid #2563eb;
+}
+
+td.number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
