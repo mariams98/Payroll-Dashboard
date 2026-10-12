@@ -11,6 +11,10 @@ export const MIN_WEEKS_FOR_RATE_BASELINE = 3
 // Flag a single day with more than 16 total hours (ST + OT).
 export const DAILY_HOURS_HIGH = 16
 
+// Flag a day that was worked (more than 0 hours) but for fewer than 2 hours.
+// The shortest worked day in the data is exactly 2.0 hours, so this is a safety net.
+export const DAILY_HOURS_LOW = 2
+
 // Standard hours above 8 in one day should probably have been overtime.
 export const DAILY_ST_MAX = 8
 

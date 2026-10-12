@@ -38,7 +38,7 @@ I profiled the data before writing any rules, and set each threshold from the re
 - duplicate weeks
 - overtime rate below the standard rate
 - overtime with no standard hours
-- very short weeks
+- very short weeks (under 8 hours) and very short days (a day worked for under 2 hours)
 - one name used under several IDs
 - a week ending that isn't a Saturday
 - invalid values (these rows are excluded from all totals)

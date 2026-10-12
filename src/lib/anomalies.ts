@@ -2,6 +2,7 @@ import { formatMoney, formatWholeMoney } from './format'
 import { groupBy, median, roundHours } from './math'
 import {
   DAILY_HOURS_HIGH,
+  DAILY_HOURS_LOW,
   DAILY_ST_MAX,
   MIN_WEEKS_FOR_RATE_BASELINE,
   RATE_DEVIATION_LIMIT,
@@ -29,6 +30,7 @@ export const RULE_LABELS: Record<RuleId, string> = {
   'apprentice-over-journeyworker': 'Apprentice above journeyworker',
   'ot-rate-below-st': 'OT rate below ST rate',
   'daily-hours-high': 'Very long day',
+  'daily-hours-low': 'Very short day',
   'daily-st-high': `Over ${DAILY_ST_MAX} ST hours in a day`,
   'weekly-hours-high': 'Very long week',
   'weekly-hours-low': 'Very short week',
@@ -205,6 +207,25 @@ export function findHighDailyHours(records: WeekRecord[]): Anomaly[] {
   return anomalies
 }
 
+// 4b. A day that was worked, but for implausibly few hours (e.g. 0.5h, likely a typo for 5h).
+// Days with 0 hours are days off, not anomalies.
+export function findLowDailyHours(records: WeekRecord[]): Anomaly[] {
+  const anomalies: Anomaly[] = []
+  for (const row of records) {
+    const shortDays = row.days.filter((d) => {
+      const hours = roundHours(d.st + d.ot)
+      return hours > 0 && hours < DAILY_HOURS_LOW
+    })
+    if (shortDays.length > 0) {
+      const list = shortDays.map((d) => `${DAY_LABELS[d.day]} ${roundHours(d.st + d.ot)}h`).join(', ')
+      anomalies.push(
+        flag(row, 'daily-hours-low', 'low', `Fewer than ${DAILY_HOURS_LOW} hours on a day worked: ${list}`),
+      )
+    }
+  }
+  return anomalies
+}
+
 // 5. More than 8 standard hours in a day; the extra hours were probably overtime.
 export function findStandardHoursOverDailyMax(records: WeekRecord[]): Anomaly[] {
   const anomalies: Anomaly[] = []
@@ -324,6 +345,7 @@ export function detectAnomalies(records: WeekRecord[]): Anomaly[] {
     ...findApprenticesPaidAboveJourneyworkers(records),
     ...findOvertimeRateBelowStandard(records),
     ...findHighDailyHours(records),
+    ...findLowDailyHours(records),
     ...findStandardHoursOverDailyMax(records),
     ...findWeeklyHours(records),
     ...findOvertimeWithoutStandard(records),

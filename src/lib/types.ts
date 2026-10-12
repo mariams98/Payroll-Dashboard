@@ -41,6 +41,7 @@ export type RuleId =
   | 'apprentice-over-journeyworker'
   | 'ot-rate-below-st'
   | 'daily-hours-high'
+  | 'daily-hours-low'
   | 'daily-st-high'
   | 'weekly-hours-high'
   | 'weekly-hours-low'

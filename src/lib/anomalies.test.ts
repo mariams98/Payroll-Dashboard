@@ -6,6 +6,7 @@ import {
   findApprenticesPaidAboveJourneyworkers,
   findDuplicateWeeks,
   findHighDailyHours,
+  findLowDailyHours,
   findNameMismatches,
   findNamesOnMultipleIds,
   findOvertimeRateBelowStandard,
@@ -162,6 +163,22 @@ describe('findHighDailyHours', () => {
   it('does not flag exactly 16 hours', () => {
     const record = makeRecord({ st: [8.1, 8, 8, 8, 8, 0, 0], ot: [7.9, 0, 0, 0, 0, 0, 0] })
     expect(findHighDailyHours([record])).toEqual([])
+  })
+})
+
+describe('findLowDailyHours', () => {
+  it('flags a worked day under 2 hours as low severity', () => {
+    const record = makeRecord({ st: [8, 8, 0.5, 8, 8, 0, 0] })
+    const anomalies = findLowDailyHours([record])
+    expect(anomalies).toHaveLength(1)
+    expect(anomalies[0].severity).toBe('low')
+    expect(anomalies[0].message).toContain('Wed 0.5h')
+  })
+
+  it('counts overtime toward the day, and ignores days off (0 hours)', () => {
+    // Mon: 1h ST + 1h OT = 2h, not under 2. Sat and Sun: 0h, days off.
+    const record = makeRecord({ st: [1, 8, 8, 8, 8, 0, 0], ot: [1, 0, 0, 0, 0, 0, 0] })
+    expect(findLowDailyHours([record])).toEqual([])
   })
 })
 
