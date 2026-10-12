@@ -65,8 +65,7 @@ function App() {
       {/* Order follows a project manager's questions: what did we spend, what's wrong, then who. */}
       {data && data.recordCount > 0 && (
         <section>
-          {/* The header already says what this is; the heading stays for screen readers. */}
-          <h2 className="visually-hidden">Summary</h2>
+          <h2>Summary</h2>
           <SummaryCards summary={data.summary} anomalySummary={data.anomalySummary} />
         </section>
       )}
