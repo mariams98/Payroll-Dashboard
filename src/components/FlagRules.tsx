@@ -1,17 +1,13 @@
 import { RULE_DESCRIPTIONS, RULE_LABELS } from '../lib/anomalies'
 import type { RuleId } from '../lib/types'
 
-// Collapsible explanation of every anomaly rule, so the reasoning is visible in the product.
+// Explanation of every anomaly rule, so the reasoning is visible in the product.
+// Opened from the "How are entries flagged?" link next to the Entries to review heading.
 function FlagRules() {
   const rules = Object.keys(RULE_DESCRIPTIONS) as RuleId[]
 
   return (
-    <details className="flag-rules">
-      <summary>How entries are flagged</summary>
-      <p className="note">
-        Thresholds were set from this project's real data, not guesses. Weekend work, weeks over 40
-        standard hours, and missing weeks are common here, so they are not flagged.
-      </p>
+    <div className="flag-rules" id="flag-rules">
       <table>
         <thead>
           <tr>
@@ -30,7 +26,7 @@ function FlagRules() {
           ))}
         </tbody>
       </table>
-    </details>
+    </div>
   )
 }
 

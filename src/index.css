@@ -279,13 +279,12 @@ th.number {
   padding: 8px 12px;
 }
 
-.flag-rules summary {
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.flag-rules summary:focus-visible {
-  outline: 2px solid #2563eb;
+/* Entries heading with the "How are entries flagged?" link beside it */
+.section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
 }
 
 td.wrap {

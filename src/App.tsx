@@ -11,6 +11,7 @@ import { employeeStats, summarize, summarizeAnomalies } from './lib/stats'
 function App() {
   const [csvText, setCsvText] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [showRules, setShowRules] = useState(false) // the "How are entries flagged?" panel
 
   // Load the CSV that ships with the app (public/payroll_data.csv).
   useEffect(() => {
@@ -72,7 +73,20 @@ function App() {
       {/* Shown even with no valid rows, since then it lists why every row was rejected. */}
       {data && (
         <section id="entries">
-          <h2>Entries to review ({data.flaggedRows.length})</h2>
+          <div className="section-heading">
+            <h2>Entries to review ({data.flaggedRows.length})</h2>
+            {/* A click-to-open panel rather than a hover tooltip: it holds a whole table and must work on touch screens. */}
+            <button
+              type="button"
+              className="link-button"
+              aria-expanded={showRules}
+              aria-controls="flag-rules"
+              onClick={() => setShowRules(!showRules)}
+            >
+              ⓘ How are entries flagged?
+            </button>
+          </div>
+          {showRules && <FlagRules />}
           {(data.anomalySummary.costAboveUsualRates > 0 || data.anomalySummary.costBelowUsualRates > 0) && (
             <p className="impact">
               Weeks with unusual pay rates cost about{' '}
@@ -85,7 +99,6 @@ function App() {
             <strong>High</strong> = check before payroll goes out · <strong>Medium</strong> = likely a
             data-entry mistake · <strong>Low</strong> = worth a glance
           </p>
-          <FlagRules />
           <AnomalyTable rows={data.flaggedRows} />
         </section>
       )}
