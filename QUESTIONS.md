@@ -1,6 +1,5 @@
 # Questions for the client
 
-Ordered by how much the answer would change the dashboard.
 
 ## Highest impact
 - Is this file what was actually paid, or timesheets before payroll runs? Determines whether a flag is money lost or a fix still possible.

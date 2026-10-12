@@ -15,7 +15,7 @@
 - Benefits = all hours × benefits rate. Assumption; see QUESTIONS.md.
 
 ## Thresholds
-Set from the data's distributions, not intuition. All in `thresholds.ts`.
+Set from the data's distributions. All in `thresholds.ts`.
 - Rate deviation > 20% from the employee's median. Real deviations are 0% or ≥ 46%, so anything from 10–40% flags the same 6 rows.
 - Day > 16 h (p99 of worked days is 12.8 h). Week > 60 h (p95 is 48.8 h, then a jump to 85+).
 - ST > 8 in a day is flagged; ST > 40 in a week is not. ~40 normal weeks exceed 40 ST while daily ST never exceeds 8, which points to daily OT.

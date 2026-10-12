@@ -62,7 +62,7 @@ On the sample file this flags **17 entries**, each matching an issue found by ha
 - **Hours are rounded when parsed; money only when displayed.** Adding decimals in JavaScript drifts (`40.89999999999999`), which could flip a "> 60 hours" check.
 - **Minimal dependencies and no backend.** 263 rows don't need a server; a sortable table is plain React state.
 
-Full reasoning and known limitations are in [DECISIONS.md](DECISIONS.md). Questions I'd ask the client (daily vs weekly overtime, mid-project raises, apprentice ratios…) are in [QUESTIONS.md](QUESTIONS.md).
+Full reasoning and known limitations are in [DECISIONS.md](DECISIONS.md). Questions I'd ask the client (daily vs weekly overtime, mid-project raises are in [QUESTIONS.md](QUESTIONS.md).
 
 ## Project structure
 
