@@ -57,4 +57,7 @@ export interface Anomaly {
   rowNumber: number
   employeeId: string
   weekEnding: string
+  // Pay-rate anomalies only: this week's cost minus what the same hours would cost at the
+  // employee's usual rates. Positive = costs more than usual, negative = less.
+  costImpact?: number
 }

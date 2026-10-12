@@ -3,6 +3,7 @@ import AnomalyTable from './components/AnomalyTable'
 import EmployeeTable from './components/EmployeeTable'
 import SummaryCards from './components/SummaryCards'
 import { canonicalNames, detectAnomalies, groupAnomaliesByRow } from './lib/anomalies'
+import { formatWholeMoney } from './lib/format'
 import { parseCsv } from './lib/parse'
 import { employeeStats, summarize, summarizeAnomalies } from './lib/stats'
 
@@ -51,23 +52,37 @@ function App() {
           No valid payroll rows found ({data.issueCount} rows had data problems).
         </p>
       )}
+      {/* Order follows a project manager's questions: what did we spend, what's wrong, then who. */}
       {data && data.recordCount > 0 && (
-        <>
-          <section>
-            <h2>Summary</h2>
-            <SummaryCards summary={data.summary} anomalySummary={data.anomalySummary} />
-          </section>
-          <section>
-            <h2>Employees</h2>
-            <EmployeeTable employees={data.employees} />
-          </section>
-        </>
+        <section>
+          <h2>Summary</h2>
+          <SummaryCards summary={data.summary} anomalySummary={data.anomalySummary} />
+        </section>
       )}
       {/* Shown even with no valid rows, since then it lists why every row was rejected. */}
       {data && (
         <section>
-          <h2>Anomalies ({data.flaggedRows.length} flagged rows)</h2>
+          <h2>Entries to review ({data.flaggedRows.length})</h2>
+          {(data.anomalySummary.costAboveUsualRates > 0 || data.anomalySummary.costBelowUsualRates > 0) && (
+            <p className="impact">
+              Weeks with unusual pay rates cost about{' '}
+              <strong>{formatWholeMoney(data.anomalySummary.costAboveUsualRates)} more</strong> and{' '}
+              <strong>{formatWholeMoney(data.anomalySummary.costBelowUsualRates)} less</strong> than the
+              same hours at each employee's usual rates.
+            </p>
+          )}
+          <p className="note">
+            <strong>High:</strong> pay or hours are almost certainly wrong; check before payroll goes
+            out. <strong>Medium:</strong> likely a data-entry mistake. <strong>Low:</strong> could be
+            legitimate; worth a glance.
+          </p>
           <AnomalyTable rows={data.flaggedRows} />
+        </section>
+      )}
+      {data && data.recordCount > 0 && (
+        <section>
+          <h2>Employees</h2>
+          <EmployeeTable employees={data.employees} />
         </section>
       )}
     </main>

@@ -43,6 +43,8 @@ The data was profiled before choosing any thresholds:
 - **Severity** reflects how likely the row is to be wrong and how much it could cost:
   - **high:** money directly affected or physically implausible (rate jumps, OT paid below ST, more than 16 h in a day, more than 60 h in a week, duplicate weeks, unreadable rows)
   - **medium:** probably a data-entry mistake (more than 8 ST in a day, apprentice paid above journeyworkers, OT with no ST, name typos)
+- **Name mismatches are split by first name.** The same first name with a different spelling ("Maxine Danch" vs "Maxine Dach") is medium: likely a typo. A different first name under the same ID ("Deanna Wisozk" under Zander Wisozk's ID) is high, because it may mean pay going to a different person. Comparing first names is a simple heuristic: it would miss a typo in the first name and wouldn't catch a nickname ("Alex" vs "Alexander").
+- **Pay-rate anomalies show their cost impact:** what the week cost minus what the same hours would cost at the employee's usual (median) standard, overtime and benefits rates. The page also totals these (about $7,432 more and $2,786 less on this data), because "how much money is at stake" is the project manager's first question. It is called "cost more/less than usual", not "overpaid", because the file may be timesheets rather than payments made (see QUESTIONS.md).
   - **low:** could be legitimate (very short weeks, two people sharing a name)
 - **Identity checks run both ways:** an ID used with several names, and a name used under several IDs. The second is low severity because two employees can share a name.
 - An employee whose typical rate is $0 is skipped by the rate-deviation rule, because a percentage change from zero is meaningless.
@@ -59,6 +61,13 @@ The data was profiled before choosing any thresholds:
   - daily standard hours above 8 **are** flagged
   - weekly standard hours above 40 **are not**
 - This is an open question for the client (see QUESTIONS.md).
+
+## Page layout follows the project manager's questions
+- The intended user is a non-technical project manager with a few minutes a week. The page answers their questions in order: *what did we spend?* (total labor cost, the largest card), *is anything wrong?* (entries to review, the red card, then the list), and *who should I look into?* (the employee table, sorted by flagged weeks).
+- The anomaly list sits above the employee table, so the PM doesn't have to scroll past 23 rows to find problems.
+- The table's "Flagged weeks" column sits next to the name, because on a laptop the table is wider than the screen and the last columns are hidden until you scroll.
+- **"Entries to review", not "weeks to review".** Each flagged item is one employee's week. "17 weeks" on a 15-week project would read as an error.
+- A one-line legend explains what high, medium and low mean in terms of action ("check before payroll goes out").
 
 ## Employee table: plain averages, with flags alongside
 - The min / avg / max rate columns use the plain mean, as the brief asks for "average". A spike week does pull an employee's average up or down, but that is visible: the min or max column shows the outlier, and the "Flagged weeks" column shows that the employee has flagged weeks.

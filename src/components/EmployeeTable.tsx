@@ -13,6 +13,7 @@ interface Column {
 // Columns are listed once here; the header and body are both built from this list.
 const COLUMNS: Column[] = [
   { key: 'name', label: 'Name' },
+  { key: 'flaggedWeeks', label: 'Flagged weeks' }, // next to the name so it's visible without scrolling
   { key: 'employeeId', label: 'ID' },
   { key: 'level', label: 'Level' },
   { key: 'occupation', label: 'Trade' },
@@ -31,22 +32,21 @@ const COLUMNS: Column[] = [
   { key: 'minBenefitsRate', label: 'Min', format: formatMoney },
   { key: 'avgBenefitsRate', label: 'Avg', format: formatMoney },
   { key: 'maxBenefitsRate', label: 'Max', format: formatMoney },
-  { key: 'flaggedWeeks', label: 'Flagged weeks' },
 ]
 
-// Top header row that groups the min/avg/max columns.
+// Top header row that groups the min/avg/max columns. Spans must add up to COLUMNS.length.
 const GROUPS = [
-  { label: '', span: 7 },
+  { label: '', span: 8 },
   { label: 'Hours per day worked', span: 3 },
   { label: 'Standard rate', span: 3 },
   { label: 'Overtime rate', span: 3 },
   { label: 'Benefits rate', span: 3 },
-  { label: '', span: 1 },
 ]
 
 function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
-  const [sortKey, setSortKey] = useState<SortKey>('name')
-  const [ascending, setAscending] = useState(true)
+  // Start with the employees who have the most flagged weeks, i.e. who to look into first.
+  const [sortKey, setSortKey] = useState<SortKey>('flaggedWeeks')
+  const [ascending, setAscending] = useState(false)
 
   // Clicking the current sort column flips the direction; a new column starts ascending.
   function handleSort(key: SortKey) {
@@ -99,8 +99,10 @@ function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
               {COLUMNS.map((column) => {
                 const value = employee[column.key]
                 const text = column.format && typeof value === 'number' ? column.format(value) : String(value)
+                let className = typeof value === 'number' ? 'number' : undefined
+                if (column.key === 'flaggedWeeks' && employee.flaggedWeeks > 0) className = 'number flagged'
                 return (
-                  <td key={column.key} className={typeof value === 'number' ? 'number' : undefined}>
+                  <td key={column.key} className={className}>
                     {text}
                   </td>
                 )

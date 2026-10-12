@@ -9,15 +9,17 @@ Requires Node 20.19+ or 22.12+.
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test         # 53 unit tests
+npm test         # unit tests (Vitest)
 npm run build    # type-check + production build
 ```
 
 ## What's on the dashboard
 
-1. **Summary:** headcount, weeks covered, total hours, overtime and apprentice share of hours, total labor cost, typical rates, and how many rows are flagged.
-2. **Employees:** a sortable table showing the min, average and max hours per day worked and each rate (standard, overtime, benefits), plus how many weeks were flagged.
-3. **Anomalies:** every flagged row, most severe first, with each reason in plain English. For example: *"Standard rate $88.57 is 131% above Kamille O'Reilly's typical $38.34"*.
+The page follows a project manager's questions in order: *what did we spend?*, *is anything wrong?*, *who should I look into?*
+
+1. **Summary:** total labor cost and entries to review first, then headcount, weeks covered, total hours, overtime and apprentice share of hours, and typical rates.
+2. **Entries to review:** every flagged row, most severe first, with each reason in plain English and, for pay-rate problems, the cost impact. For example: *"Standard rate $88.57 is 131% above Kamille O'Reilly's typical $38.34… This week cost about $2,897 more than at the usual rates."*
+3. **Employees:** a sortable table, opening with the most-flagged employees first. It shows the min, average and max hours per day worked and each rate (standard, overtime, benefits).
 
 ## How anomalies are defined
 
@@ -30,7 +32,7 @@ I profiled the data before writing any rules, and set each threshold from the re
 | Very long day | More than 16 hours in one day | high | 4 |
 | Over 8 ST hours in a day | The extra hours should probably have been overtime | medium | 8 |
 | Apprentice above journeyworker | Apprentice is paid more than the typical journeyworker in the same trade | medium | 2 |
-| Name mismatch | The name differs from the one usually used for that ID | medium | 3 |
+| Name mismatch | The name differs from the one usually used for that ID. Medium for a spelling difference; high if the first name differs (possibly a different person) | medium / high | 3 |
 
 **Safety-net checks** that find nothing in this file, but protect future uploads:
 - duplicate weeks
@@ -45,7 +47,9 @@ I profiled the data before writing any rules, and set each threshold from the re
 - 6 weeks where the pay rates jumped or dropped
 - 4 weeks of 85+ hours
 - 4 days of about 20 hours
-- 3 name problems
+- 3 name problems: 2 typos, plus a different first name under one ID
+
+The unusual pay rates alone cost about **$7,432 more and $2,786 less** than the same hours at each employee's usual rates.
 
 **Deliberately not flagged:** weekend work, weeks with more than 40 standard hours, and missing weeks. All three are common in this data, so they look like normal patterns on this project rather than errors.
 

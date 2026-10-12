@@ -88,11 +88,23 @@ describe('summarizeAnomalies', () => {
     })
     // Row 2 has a high and a medium hit, so it counts as one high row.
     const rows = groupAnomaliesByRow([anomaly(2, 'high'), anomaly(2, 'medium'), anomaly(5, 'low')], new Map())
-    expect(summarizeAnomalies(rows)).toEqual({ high: 1, medium: 0, low: 1, flaggedRows: 2 })
+    expect(summarizeAnomalies(rows)).toEqual({
+      high: 1,
+      medium: 0,
+      low: 1,
+      flaggedRows: 2,
+      flaggedEmployees: 1,
+      costAboveUsualRates: 0,
+      costBelowUsualRates: 0,
+    })
   })
 
-  it('matches the anomaly table on the real data: 14 high rows and 3 medium rows', () => {
+  it('matches the anomaly table on the real data: 15 high and 2 medium rows across 13 employees', () => {
     const rows = groupAnomaliesByRow(detectAnomalies(records), new Map())
-    expect(summarizeAnomalies(rows)).toEqual({ high: 14, medium: 3, low: 0, flaggedRows: 17 })
+    const result = summarizeAnomalies(rows)
+    expect(result).toMatchObject({ high: 15, medium: 2, low: 0, flaggedRows: 17, flaggedEmployees: 13 })
+    // Expected values computed separately with a plain Node script over the raw CSV.
+    expect(result.costAboveUsualRates).toBeCloseTo(7431.54, 2)
+    expect(result.costBelowUsualRates).toBeCloseTo(2785.86, 2)
   })
 })

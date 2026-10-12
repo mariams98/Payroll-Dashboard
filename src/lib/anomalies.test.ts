@@ -79,6 +79,21 @@ describe('findRateDeviations', () => {
     expect(anomalies[0].message).toContain('150% above')
   })
 
+  it("estimates the week's extra cost compared with the usual rates", () => {
+    // 40 ST hours at $100 instead of $40 = $2,400 more (OT 0h, benefits rate unchanged).
+    const records = [40, 40, 40, 100].map((rate) => makeRecord({ standardRate: rate }))
+    const anomaly = findRateDeviations(records)[0]
+    expect(anomaly.costImpact).toBe(2400)
+    expect(anomaly.message).toContain('about $2,400 more than at the usual rates')
+  })
+
+  it('reports a rate drop as costing less', () => {
+    const records = [40, 40, 40, 20].map((rate) => makeRecord({ standardRate: rate }))
+    const anomaly = findRateDeviations(records)[0]
+    expect(anomaly.costImpact).toBe(-800)
+    expect(anomaly.message).toContain('$800 less')
+  })
+
   it('flags a drop as well as a spike', () => {
     const records = [40, 40, 40, 20].map((rate) => makeRecord({ standardRate: rate }))
     expect(findRateDeviations(records)[0].message).toContain('50% below')
@@ -244,6 +259,19 @@ describe('findNameMismatches', () => {
     const anomalies = findNameMismatches(records)
     expect(anomalies).toHaveLength(1)
     expect(anomalies[0].message).toContain('"Maxine Danch" differs from "Maxine Dach"')
+    expect(anomalies[0].severity).toBe('medium') // same first name: likely a spelling mistake
+    expect(anomalies[0].message).toContain('Likely a spelling mistake')
+  })
+
+  it('treats a different first name as a possible different person (high)', () => {
+    const records = [
+      makeRecord({ name: 'Zander Wisozk' }),
+      makeRecord({ name: 'Zander Wisozk' }),
+      makeRecord({ name: 'Deanna Wisozk' }),
+    ]
+    const anomalies = findNameMismatches(records)
+    expect(anomalies[0].severity).toBe('high')
+    expect(anomalies[0].message).toContain('may be a different person')
   })
 })
 
@@ -357,11 +385,11 @@ describe('detectAnomalies on the real data file', () => {
     ])
   })
 
-  it('groups into 17 flagged rows: 14 high, then the 3 medium name mismatches', () => {
+  it('groups into 17 flagged rows: 15 high, then the 2 medium name typos', () => {
     const rows = groupAnomaliesByRow(anomalies, canonicalNames(parseCsv(csvText).records))
     expect(rows).toHaveLength(17)
-    expect(rows.filter((r) => r.severity === 'high')).toHaveLength(14)
-    expect(rows.slice(14).every((r) => r.anomalies[0].rule === 'name-mismatch')).toBe(true)
+    expect(rows.filter((r) => r.severity === 'high')).toHaveLength(15)
+    expect(rows.slice(15).every((r) => r.anomalies[0].rule === 'name-mismatch')).toBe(true)
     // 1001's spike week is flagged by two rules but appears once.
     const spike = rows.find((r) => r.employeeId === '1001' && r.weekEnding === '03/15/2025')
     expect(spike?.anomalies.map((a) => a.rule)).toEqual(['rate-deviation', 'apprentice-over-journeyworker'])

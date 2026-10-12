@@ -23,6 +23,11 @@ section {
   color: #b91c1c;
 }
 
+.impact {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+
 .note {
   color: #6b7280;
   font-size: 0.875rem;
@@ -56,6 +61,24 @@ section {
 .card-detail {
   color: #6b7280;
   font-size: 0.8125rem;
+}
+
+/* The two headline cards (total cost, entries to review) are larger and sit on their own row. */
+.cards-primary {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  margin-bottom: 12px;
+}
+
+.cards-primary .card-value {
+  font-size: 2.5rem;
+}
+
+.card-alert {
+  border-left: 4px solid #dc2626;
+}
+
+.card-alert .card-value {
+  color: #b91c1c;
 }
 
 /* Tables */
@@ -103,6 +126,11 @@ th button:focus-visible {
 td.number {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+td.flagged {
+  color: #b91c1c;
+  font-weight: 600;
 }
 
 tbody tr:hover {

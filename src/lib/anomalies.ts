@@ -1,4 +1,4 @@
-import { formatMoney } from './format'
+import { formatMoney, formatWholeMoney } from './format'
 import { groupBy, median, roundHours } from './math'
 import {
   DAILY_HOURS_HIGH,
@@ -108,22 +108,33 @@ export function findRateDeviations(records: WeekRecord[]): Anomaly[] {
     if (rows.length < MIN_WEEKS_FOR_RATE_BASELINE) continue // too few weeks to know the usual rate
     const typicalRate = median(rows.map((r) => r.standardRate))
     if (typicalRate === 0) continue // no meaningful baseline to compare against
+    const typicalOvertimeRate = median(rows.map((r) => r.overtimeRate))
+    const typicalBenefitsRate = median(rows.map((r) => r.benefitsRate))
 
     for (const row of rows) {
       const change = (row.standardRate - typicalRate) / typicalRate
       if (Math.abs(change) > RATE_DEVIATION_LIMIT) {
         const percent = Math.round(Math.abs(change) * 100)
         const direction = change > 0 ? 'above' : 'below'
-        anomalies.push(
-          flag(
-            row,
-            'rate-deviation',
-            'high',
-            `Standard rate ${formatMoney(row.standardRate)} is ${percent}% ${direction} ` +
-              `${names.get(employeeId)}'s typical ${formatMoney(typicalRate)} ` +
-              `(OT ${formatMoney(row.overtimeRate)}, benefits ${formatMoney(row.benefitsRate)})`,
-          ),
+
+        // What this week cost minus what the same hours would cost at the usual rates.
+        const costImpact =
+          row.stHours * (row.standardRate - typicalRate) +
+          row.otHours * (row.overtimeRate - typicalOvertimeRate) +
+          row.totalHours * (row.benefitsRate - typicalBenefitsRate)
+        const impactText = `${formatWholeMoney(Math.abs(costImpact))} ${costImpact > 0 ? 'more' : 'less'}`
+
+        const anomaly = flag(
+          row,
+          'rate-deviation',
+          'high',
+          `Standard rate ${formatMoney(row.standardRate)} is ${percent}% ${direction} ` +
+            `${names.get(employeeId)}'s typical ${formatMoney(typicalRate)} ` +
+            `(OT ${formatMoney(row.overtimeRate)}, benefits ${formatMoney(row.benefitsRate)}). ` +
+            `This week cost about ${impactText} than at the usual rates.`,
         )
+        anomaly.costImpact = costImpact
+        anomalies.push(anomaly)
       }
     }
   }
@@ -267,18 +278,27 @@ export function findDuplicateWeeks(records: WeekRecord[]): Anomaly[] {
 }
 
 // 10. A row's name differs from the name usually used for that employee_id.
+// A different first name suggests a different person paid under this ID (high);
+// otherwise it is most likely a spelling mistake (medium).
 export function findNameMismatches(records: WeekRecord[]): Anomaly[] {
   const names = canonicalNames(records)
-  return records
-    .filter((r) => r.name !== names.get(r.employeeId))
-    .map((r) =>
-      flag(
-        r,
-        'name-mismatch',
-        'medium',
-        `Name "${r.name}" differs from "${names.get(r.employeeId)}" used on other rows for ID ${r.employeeId}`,
-      ),
-    )
+  const firstName = (name: string) => name.split(' ')[0].toLowerCase()
+  const anomalies: Anomaly[] = []
+
+  for (const row of records) {
+    const usualName = names.get(row.employeeId) ?? row.name
+    if (row.name === usualName) continue
+
+    const base = `Name "${row.name}" differs from "${usualName}" used on other rows for ID ${row.employeeId}`
+    if (firstName(row.name) !== firstName(usualName)) {
+      anomalies.push(
+        flag(row, 'name-mismatch', 'high', `${base}. Different first name: this may be a different person paid under this ID.`),
+      )
+    } else {
+      anomalies.push(flag(row, 'name-mismatch', 'medium', `${base}. Likely a spelling mistake.`))
+    }
+  }
+  return anomalies
 }
 
 // 11. The same name appears under more than one employee_id. Could be two people

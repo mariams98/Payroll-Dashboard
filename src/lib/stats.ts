@@ -31,6 +31,10 @@ export interface AnomalySummary {
   medium: number
   low: number
   flaggedRows: number
+  flaggedEmployees: number // distinct employees with at least one flagged row
+  // From pay-rate anomalies: total cost above / below what the same hours cost at usual rates.
+  costAboveUsualRates: number
+  costBelowUsualRates: number
 }
 
 // One row of the employee table. Kept flat so any column can be sorted by its key.
@@ -107,11 +111,15 @@ export function summarize(records: WeekRecord[]): Summary {
 }
 
 export function summarizeAnomalies(rows: FlaggedRow[]): AnomalySummary {
+  const impacts = rows.flatMap((r) => r.anomalies.map((a) => a.costImpact ?? 0))
   return {
+    costAboveUsualRates: sum(impacts.filter((i) => i > 0)),
+    costBelowUsualRates: sum(impacts.filter((i) => i < 0).map((i) => -i)),
     high: rows.filter((r) => r.severity === 'high').length,
     medium: rows.filter((r) => r.severity === 'medium').length,
     low: rows.filter((r) => r.severity === 'low').length,
     flaggedRows: rows.length,
+    flaggedEmployees: new Set(rows.map((r) => r.employeeId)).size,
   }
 }
 
