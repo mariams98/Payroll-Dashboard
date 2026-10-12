@@ -35,8 +35,10 @@ describe('summarize on the real data file', () => {
     expect(summary.typicalBenefitsRate).toBe(16.25)
   })
 
-  it('computes the hours-weighted standard rate (ST pay ÷ ST hours)', () => {
-    expect(summary.hoursWeightedStandardRate).toBeCloseTo(41.59, 2)
+  it('computes hours-weighted average rates (pay ÷ hours)', () => {
+    expect(summary.hoursWeightedStandardRate).toBeCloseTo(41.5937, 4) // ST pay ÷ ST hours
+    expect(summary.hoursWeightedOvertimeRate).toBeCloseTo(62.7244, 4) // OT pay ÷ OT hours
+    expect(summary.hoursWeightedBenefitsRate).toBeCloseTo(16.1951, 4) // benefits ÷ all hours
   })
 
   it('counts weeks by date, so differently formatted dates are the same week', () => {

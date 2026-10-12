@@ -68,12 +68,22 @@ function SummaryCards({ summary, anomalySummary }: Props) {
       value: formatPercent(summary.apprenticeShare),
       detail: 'Hours worked by apprentices',
     },
+    // Averages are weighted by hours (what was actually paid per hour). The typical rate below
+    // each is the median employee's usual rate, which one-off spike weeks don't move.
     {
-      label: 'Typical standard rate',
-      value: formatMoney(summary.typicalStandardRate),
-      detail:
-        `Hours-weighted average ${formatMoney(summary.hoursWeightedStandardRate)}. ` +
-        `Typical OT ${formatMoney(summary.typicalOvertimeRate)}, benefits ${formatMoney(summary.typicalBenefitsRate)}`,
+      label: 'Average standard rate',
+      value: formatMoney(summary.hoursWeightedStandardRate),
+      detail: `Typical employee: ${formatMoney(summary.typicalStandardRate)}`,
+    },
+    {
+      label: 'Average overtime rate',
+      value: formatMoney(summary.hoursWeightedOvertimeRate),
+      detail: `Typical employee: ${formatMoney(summary.typicalOvertimeRate)}`,
+    },
+    {
+      label: 'Average benefits rate',
+      value: formatMoney(summary.hoursWeightedBenefitsRate),
+      detail: `Typical employee: ${formatMoney(summary.typicalBenefitsRate)}`,
     },
   ]
 
@@ -82,9 +92,9 @@ function SummaryCards({ summary, anomalySummary }: Props) {
       <CardGrid cards={primaryCards} primary />
       <CardGrid cards={secondaryCards} />
       <p className="note">
-        Totals include every row as submitted, including flagged rows. Typical rates are the median
-        of each employee's usual rate, so one-off spikes don't skew them. The hours-weighted average
-        is what was actually paid per standard hour across all rows.
+        Totals include every row as submitted, including flagged rows. Average rates are weighted by
+        hours, i.e. what was actually paid per hour. "Typical employee" is the median of each
+        employee's usual rate, so one-off spike weeks don't skew it.
       </p>
     </>
   )

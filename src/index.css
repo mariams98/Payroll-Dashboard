@@ -36,7 +36,8 @@ section {
 /* Summary cards */
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* 170px fits all 7 secondary cards on one row on a laptop screen */
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 12px;
 }
 
