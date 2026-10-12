@@ -3,7 +3,7 @@ import { RULE_LABELS } from '../lib/anomalies'
 import type { FlaggedRow } from '../lib/anomalies'
 import { formatDate, formatHours, formatMoney, formatSignedMoney } from '../lib/format'
 import { DAILY_HOURS_HIGH, DAILY_HOURS_LOW, DAILY_ST_MAX } from '../lib/thresholds'
-import type { Anomaly, DayHours, Severity, WeekRecord } from '../lib/types'
+import type { Anomaly, DayHours, RuleId, Severity, WeekRecord } from '../lib/types'
 
 // What each severity means for the project manager; shown as a tooltip on its filter chip and badge.
 const SEVERITY_HELP: Record<Severity, string> = {
@@ -37,8 +37,24 @@ function otClass(day: DayHours): string {
   return isUnusualTotal(day) ? 'number flagged' : 'number'
 }
 
+// Rules about hours, and rules about pay rates; decide which context the detail view shows.
+const HOURS_RULES = new Set<RuleId>([
+  'daily-hours-high',
+  'daily-hours-low',
+  'daily-st-high',
+  'weekly-hours-high',
+  'weekly-hours-low',
+  'ot-without-st',
+])
+const RATE_RULES = new Set<RuleId>(['rate-deviation', 'apprentice-over-journeyworker', 'ot-rate-below-st'])
+
 // The expanded part of a row: every reason in full, the week's hours by day, its rates, and the CSV line.
 function RowDetails({ row, record }: { row: FlaggedRow; record?: WeekRecord }) {
+  // Show only the context that explains this row's reasons: the day grid for hours problems,
+  // the week's rates for pay problems. Name mismatches need neither.
+  const showHours = record !== undefined && row.anomalies.some((a) => HOURS_RULES.has(a.rule))
+  const showRates = record !== undefined && row.anomalies.some((a) => RATE_RULES.has(a.rule))
+
   return (
     <div className="row-details">
       <ul className="reasons">
@@ -49,47 +65,48 @@ function RowDetails({ row, record }: { row: FlaggedRow; record?: WeekRecord }) {
         ))}
       </ul>
 
-      {record && (
-        <>
-          <table className="day-table">
-            <thead>
-              <tr>
-                <th>Hours</th>
-                {record.days.map((d) => (
-                  <th key={d.day} className="number">
-                    {d.day.charAt(0).toUpperCase() + d.day.slice(1)}
-                  </th>
-                ))}
-                <th className="number">Week</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>Standard</th>
-                {record.days.map((d) => (
-                  <td key={d.day} className={stClass(d)}>
-                    {formatHours(d.st)}
-                  </td>
-                ))}
-                <td className="number">{formatHours(record.stHours)}</td>
-              </tr>
-              <tr>
-                <th>Overtime</th>
-                {record.days.map((d) => (
-                  <td key={d.day} className={otClass(d)}>
-                    {formatHours(d.ot)}
-                  </td>
-                ))}
-                <td className="number">{formatHours(record.otHours)}</td>
-              </tr>
-            </tbody>
-          </table>
-          <p className="muted">
-            Rates this week: standard {formatMoney(record.standardRate)} · overtime{' '}
-            {formatMoney(record.overtimeRate)} · benefits {formatMoney(record.benefitsRate)} · week cost{' '}
-            {formatMoney(record.totalCost)}
-          </p>
-        </>
+      {record && showHours && (
+        <table className="day-table">
+          <thead>
+            <tr>
+              <th>Hours</th>
+              {record.days.map((d) => (
+                <th key={d.day} className="number">
+                  {d.day.charAt(0).toUpperCase() + d.day.slice(1)}
+                </th>
+              ))}
+              <th className="number">Week</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Standard</th>
+              {record.days.map((d) => (
+                <td key={d.day} className={stClass(d)}>
+                  {formatHours(d.st)}
+                </td>
+              ))}
+              <td className="number">{formatHours(record.stHours)}</td>
+            </tr>
+            <tr>
+              <th>Overtime</th>
+              {record.days.map((d) => (
+                <td key={d.day} className={otClass(d)}>
+                  {formatHours(d.ot)}
+                </td>
+              ))}
+              <td className="number">{formatHours(record.otHours)}</td>
+            </tr>
+          </tbody>
+        </table>
+      )}
+
+      {record && showRates && (
+        <p className="muted">
+          Rates this week: standard {formatMoney(record.standardRate)} · overtime{' '}
+          {formatMoney(record.overtimeRate)} · benefits {formatMoney(record.benefitsRate)} · week cost{' '}
+          {formatMoney(record.totalCost)}
+        </p>
       )}
 
       <p className="muted">Source: line {row.rowNumber} of the CSV file</p>
