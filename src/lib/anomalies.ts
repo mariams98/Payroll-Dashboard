@@ -89,16 +89,24 @@ export interface FlaggedRow {
   severity: Severity // the most severe of its anomalies
   anomalies: Anomaly[]
   costImpact?: number // sum of its anomalies' cost impacts; undefined if none has one
+  record?: WeekRecord // the full week, for the detail view; undefined if the row was invalid
 }
 
 // Combine anomalies for the same CSV row, most severe rows first, then in file order.
-export function groupAnomaliesByRow(anomalies: Anomaly[], names: Map<string, string>): FlaggedRow[] {
+// `records` is used to attach each row's full week (hours by day, rates) for the detail view.
+export function groupAnomaliesByRow(
+  anomalies: Anomaly[],
+  names: Map<string, string>,
+  records: WeekRecord[] = [],
+): FlaggedRow[] {
+  const recordsByRow = new Map(records.map((r) => [r.rowNumber, r]))
   const rows: FlaggedRow[] = []
   for (const rowAnomalies of groupBy(anomalies, (a) => String(a.rowNumber)).values()) {
     const first = rowAnomalies[0]
     const sorted = [...rowAnomalies].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity])
     const impacts = rowAnomalies.filter((a) => a.costImpact !== undefined).map((a) => a.costImpact ?? 0)
     rows.push({
+      record: recordsByRow.get(first.rowNumber), // undefined for rows excluded as invalid
       costImpact: impacts.length > 0 ? impacts.reduce((total, i) => total + i, 0) : undefined,
       rowNumber: first.rowNumber,
       employeeId: first.employeeId,

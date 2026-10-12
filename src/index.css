@@ -167,14 +167,11 @@ tbody tr:hover {
 }
 
 /* Anomaly table */
-td.reasons {
-  white-space: normal; /* messages are long; let them wrap */
-  min-width: 360px;
-}
-
-td.reasons ul {
-  margin: 0;
+/* Full explanations in an expanded entry */
+ul.reasons {
+  margin: 0 0 12px;
   padding-left: 18px;
+  white-space: normal; /* messages are long; let them wrap */
 }
 
 td {
@@ -269,7 +266,7 @@ a.card-link:focus-visible {
 }
 
 /* Supporting reasons ("Over 8 ST hours" next to a stronger reason) are de-emphasized */
-td.reasons li.secondary {
+ul.reasons li.secondary {
   color: #6b7280;
   font-size: 0.8125rem;
 }
@@ -367,4 +364,87 @@ tbody tr:hover td.sticky-col {
 /* Inside a group, cards share the row equally */
 .card-group .cards {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+/* Entries table: filter chips on the left, "Expand all" on the right */
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.table-toolbar .chips {
+  margin-bottom: 0;
+}
+
+.link-button {
+  all: unset;
+  cursor: pointer;
+  color: #1d4ed8;
+  font-size: 0.875rem;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+}
+
+.link-button:focus-visible,
+.expand-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Each entry row can be clicked to show its details */
+.entry-row {
+  cursor: pointer;
+}
+
+.expand-button {
+  all: unset;
+  cursor: pointer;
+  display: inline-block;
+  width: 1.25em;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #374151;
+}
+
+/* Short rule labels in the collapsed row, separated by dots */
+td.issues {
+  white-space: normal;
+}
+
+.issue + .issue::before {
+  content: ' · ';
+  color: #9ca3af;
+}
+
+.issue.secondary {
+  color: #6b7280;
+}
+
+.details-row > td {
+  background: #f9fafb;
+  padding-top: 4px;
+  padding-bottom: 12px;
+}
+
+.row-details p {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+}
+
+/* Day-by-day hours inside an expanded entry */
+.day-table {
+  width: auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+.day-table th,
+.day-table td {
+  padding: 4px 10px;
 }

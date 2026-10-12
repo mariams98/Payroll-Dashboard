@@ -410,7 +410,8 @@ describe('detectAnomalies on the real data file', () => {
   })
 
   it('groups into 17 flagged rows: 15 high, then the 2 medium name typos', () => {
-    const rows = groupAnomaliesByRow(anomalies, canonicalNames(parseCsv(csvText).records))
+    const { records } = parseCsv(csvText)
+    const rows = groupAnomaliesByRow(anomalies, canonicalNames(records), records)
     expect(rows).toHaveLength(17)
     expect(rows.filter((r) => r.severity === 'high')).toHaveLength(15)
     expect(rows.slice(15).every((r) => r.anomalies[0].rule === 'name-mismatch')).toBe(true)
@@ -422,6 +423,22 @@ describe('detectAnomalies on the real data file', () => {
     expect(spike?.costImpact).toBeCloseTo(2896.98, 2)
     // Rows without a pay-rate problem have no cost impact.
     expect(rows.find((r) => r.anomalies[0].rule === 'weekly-hours-high')?.costImpact).toBeUndefined()
+    // The full week is attached for the detail view (CSV line 40: Kamille's $88.57 week).
+    expect(spike?.record?.rowNumber).toBe(40)
+    expect(spike?.record?.standardRate).toBe(88.57)
+  })
+
+  it('leaves the week off rows that were excluded as invalid', () => {
+    const invalid: Anomaly = {
+      rule: 'invalid-data',
+      severity: 'high',
+      message: 'Row excluded',
+      rowNumber: 999,
+      employeeId: '1',
+      weekEnding: 'bad',
+    }
+    const { records } = parseCsv(csvText)
+    expect(groupAnomaliesByRow([invalid], new Map(), records)[0].record).toBeUndefined()
   })
 
   it('flags the misspelled or mismatched names, not the usual spelling', () => {

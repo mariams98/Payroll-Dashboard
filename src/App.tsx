@@ -30,7 +30,7 @@ function App() {
     // Data problems found while parsing and the rule-based anomalies go in one list,
     // so the summary and the anomaly table always see both.
     const anomalies = [...issues, ...detectAnomalies(records)]
-    const flaggedRows = groupAnomaliesByRow(anomalies, canonicalNames(records))
+    const flaggedRows = groupAnomaliesByRow(anomalies, canonicalNames(records), records)
     return {
       recordCount: records.length,
       issueCount: issues.length,
