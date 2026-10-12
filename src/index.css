@@ -34,7 +34,7 @@ h1 {
   white-space: nowrap;
 }
 
-/* Clicking the entries card scrolls smoothly to the list. */
+/* Clicking the Entries or Employees card scrolls smoothly to its section. */
 html {
   scroll-behavior: smooth;
 }
@@ -209,7 +209,12 @@ a.card-link {
   text-decoration: none;
 }
 
+/* Clickable cards: a neutral hover, and a light red one for the alert card */
 a.card-link:hover {
+  background: #f3f4f6;
+}
+
+a.card-link.card-alert:hover {
   background: #fef2f2;
 }
 

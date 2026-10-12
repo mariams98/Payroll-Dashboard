@@ -99,7 +99,7 @@ function App() {
         </section>
       )}
       {data && data.recordCount > 0 && (
-        <section>
+        <section id="employees">
           <h2>Employees</h2>
           <EmployeeTable employees={data.employees} />
         </section>

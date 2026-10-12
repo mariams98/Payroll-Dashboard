@@ -84,6 +84,7 @@ function SummaryCards({ summary, anomalySummary }: Props) {
           label: 'Employees',
           value: String(summary.employeeCount),
           detail: `${summary.apprenticeCount} apprentices, ${summary.journeyworkerCount} journeyworkers`,
+          href: '#employees', // jumps to the employee table
         },
         {
           label: 'Apprentice share of hours',
