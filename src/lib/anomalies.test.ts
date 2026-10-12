@@ -15,6 +15,7 @@ import {
   findStandardHoursOverDailyMax,
   findWeeklyHours,
   groupAnomaliesByRow,
+  RULE_DESCRIPTIONS,
 } from './anomalies'
 import { roundHours } from './math'
 import { normalizeRows, parseCsv, parseWeekEnding } from './parse'
@@ -295,6 +296,15 @@ describe('findNamesOnMultipleIds', () => {
     const anomalies = findNamesOnMultipleIds(records)
     expect(anomalies).toHaveLength(2)
     expect(anomalies[0].message).toContain('employee IDs 1, 2')
+  })
+})
+
+describe('RULE_DESCRIPTIONS', () => {
+  it('quotes the actual threshold values, so the panel matches the rules', () => {
+    expect(RULE_DESCRIPTIONS['rate-deviation'].when).toContain('20%')
+    expect(RULE_DESCRIPTIONS['weekly-hours-high'].when).toContain('60 hours')
+    expect(RULE_DESCRIPTIONS['daily-hours-high'].when).toContain('16 hours')
+    expect(RULE_DESCRIPTIONS['daily-hours-low'].when).toContain('2 hours')
   })
 })
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import AnomalyTable from './components/AnomalyTable'
 import EmployeeTable from './components/EmployeeTable'
+import FlagRules from './components/FlagRules'
 import SummaryCards from './components/SummaryCards'
 import { canonicalNames, detectAnomalies, groupAnomaliesByRow } from './lib/anomalies'
 import { formatDate, formatWholeMoney } from './lib/format'
@@ -84,6 +85,7 @@ function App() {
             <strong>High</strong> = check before payroll goes out · <strong>Medium</strong> = likely a
             data-entry mistake · <strong>Low</strong> = worth a glance
           </p>
+          <FlagRules />
           <AnomalyTable rows={data.flaggedRows} />
         </section>
       )}

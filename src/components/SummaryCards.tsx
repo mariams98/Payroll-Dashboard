@@ -18,7 +18,7 @@ interface Card {
 // Shown as a tooltip on the rate cards.
 const RATE_HELP =
   'Average = weighted by hours, i.e. what was actually paid per hour. ' +
-  "Typical employee = the median of each employee's usual rate, so one-off spike weeks don't move it."
+  "Typical = the median of each employee's usual rate, so one-off spike weeks don't move it."
 
 function CardGrid({ cards, primary = false }: { cards: Card[]; primary?: boolean }) {
   return (
@@ -67,54 +67,78 @@ function SummaryCards({ summary, anomalySummary }: Props) {
     },
   ]
 
-  const secondaryCards: Card[] = [
+  // Secondary stats, grouped so related numbers sit together.
+  const groups: { title: string; cards: Card[] }[] = [
     {
-      label: 'Employees',
-      value: String(summary.employeeCount),
-      detail: `${summary.apprenticeCount} apprentices, ${summary.journeyworkerCount} journeyworkers`,
+      title: 'Workforce',
+      cards: [
+        {
+          label: 'Employees',
+          value: String(summary.employeeCount),
+          detail: `${summary.apprenticeCount} apprentices, ${summary.journeyworkerCount} journeyworkers`,
+        },
+        {
+          label: 'Apprentice share of hours',
+          value: formatPercent(summary.apprenticeShare),
+          detail: 'Hours worked by apprentices',
+        },
+      ],
     },
     {
-      label: 'Weeks covered',
-      value: String(summary.weekCount),
-      detail: `${formatDate(summary.firstWeek)} – ${formatDate(summary.lastWeek)}`,
+      title: 'Hours',
+      cards: [
+        {
+          label: 'Total hours',
+          value: formatHours(summary.totalHours),
+          detail: `${formatPercent(summary.overtimeShare)} overtime`,
+        },
+        {
+          label: 'Weeks covered',
+          value: String(summary.weekCount),
+          detail: `${formatDate(summary.firstWeek)} – ${formatDate(summary.lastWeek)}`,
+        },
+      ],
     },
     {
-      label: 'Total hours',
-      value: formatHours(summary.totalHours),
-      detail: `${formatPercent(summary.overtimeShare)} overtime`,
-    },
-    {
-      label: 'Apprentice share of hours',
-      value: formatPercent(summary.apprenticeShare),
-      detail: 'Hours worked by apprentices',
-    },
-    {
-      label: 'Average standard rate',
-      help: RATE_HELP,
-      value: formatMoney(summary.hoursWeightedStandardRate),
-      detail: `Typical employee: ${formatMoney(summary.typicalStandardRate)}`,
-    },
-    {
-      label: 'Average overtime rate',
-      help: RATE_HELP,
-      value: formatMoney(summary.hoursWeightedOvertimeRate),
-      detail: `Typical employee: ${formatMoney(summary.typicalOvertimeRate)}`,
-    },
-    {
-      label: 'Average benefits rate',
-      help: RATE_HELP,
-      value: formatMoney(summary.hoursWeightedBenefitsRate),
-      detail: `Typical employee: ${formatMoney(summary.typicalBenefitsRate)}`,
+      title: 'Average rates (per hour)',
+      cards: [
+        {
+          label: 'Standard',
+          help: RATE_HELP,
+          value: formatMoney(summary.hoursWeightedStandardRate),
+          detail: `Typical ${formatMoney(summary.typicalStandardRate)}`,
+        },
+        {
+          label: 'Overtime',
+          help: RATE_HELP,
+          value: formatMoney(summary.hoursWeightedOvertimeRate),
+          detail: `Typical ${formatMoney(summary.typicalOvertimeRate)}`,
+        },
+        {
+          label: 'Benefits',
+          help: RATE_HELP,
+          value: formatMoney(summary.hoursWeightedBenefitsRate),
+          detail: `Typical ${formatMoney(summary.typicalBenefitsRate)}`,
+        },
+      ],
     },
   ]
 
   return (
     <>
       <CardGrid cards={primaryCards} primary />
-      <CardGrid cards={secondaryCards} />
+      <div className="card-groups">
+        {groups.map((group) => (
+          // Each group grows in proportion to its number of cards, so all cards end up the same width.
+          <div className="card-group" key={group.title} style={{ flexGrow: group.cards.length }}>
+            <h3 className="card-group-title">{group.title}</h3>
+            <CardGrid cards={group.cards} />
+          </div>
+        ))}
+      </div>
       <p className="note">
-        Totals include flagged entries. Average rates are weighted by hours; "typical employee" is
-        the median employee's usual rate.
+        Totals include flagged entries. Average rates are weighted by hours (what was actually paid
+        per hour); "typical" is the median employee's usual rate.
       </p>
     </>
   )

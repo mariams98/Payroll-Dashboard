@@ -43,6 +43,15 @@ const GROUPS = [
   { label: 'Benefits rate', span: 3 },
 ]
 
+// First column of each min/avg/max group gets a divider line on its left.
+const GROUP_STARTS = new Set<SortKey>(['minDailyHours', 'minStandardRate', 'minOvertimeRate', 'minBenefitsRate'])
+
+// CSS classes for a header or body cell: the Name column stays put while scrolling sideways.
+function cellClass(column: Column, extra?: string): string | undefined {
+  const classes = [extra, column.key === 'name' && 'sticky-col', GROUP_STARTS.has(column.key) && 'group-start']
+  return classes.filter(Boolean).join(' ') || undefined
+}
+
 function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
   // Start with the employees who have the most flagged weeks, i.e. who to look into first.
   const [sortKey, setSortKey] = useState<SortKey>('flaggedWeeks')
@@ -69,12 +78,13 @@ function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
   })
 
   return (
-    <div className="table-wrapper">
+    // table-scroll: the table scrolls inside its own box, so the header row can stay visible.
+    <div className="table-wrapper table-scroll">
       <table>
         <thead>
           <tr>
             {GROUPS.map((group, i) => (
-              <th key={i} colSpan={group.span} className="group-header">
+              <th key={i} colSpan={group.span} className={i > 0 ? 'group-header group-start' : 'group-header'}>
                 {group.label}
               </th>
             ))}
@@ -83,6 +93,8 @@ function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
             {COLUMNS.map((column) => (
               <th
                 key={column.key}
+                // Numeric headers line up with their right-aligned numbers.
+                className={cellClass(column, typeof employees[0]?.[column.key] === 'number' ? 'number' : undefined)}
                 aria-sort={column.key === sortKey ? (ascending ? 'ascending' : 'descending') : 'none'}
               >
                 <button type="button" onClick={() => handleSort(column.key)}>
@@ -100,8 +112,9 @@ function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
                 const value = employee[column.key]
                 let text = column.format && typeof value === 'number' ? column.format(value) : String(value)
                 if (column.key === 'level') text = formatLevel(text) // "JOURNEYWORKER" -> "Journeyworker"
-                let className = typeof value === 'number' ? 'number' : undefined
-                if (column.key === 'flaggedWeeks' && employee.flaggedWeeks > 0) className = 'number flagged'
+                let type = typeof value === 'number' ? 'number' : undefined
+                if (column.key === 'flaggedWeeks' && employee.flaggedWeeks > 0) type = 'number flagged'
+                const className = cellClass(column, type)
                 return (
                   <td key={column.key} className={className}>
                     {text}

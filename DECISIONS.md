@@ -70,6 +70,9 @@ The data was profiled before choosing any thresholds:
 - The table's "Flagged weeks" column sits next to the name, because on a laptop the table is wider than the screen and the last columns are hidden until you scroll.
 - **"Entries to review", not "weeks to review".** Each flagged item is one employee's week. "17 weeks" on a 15-week project would read as an error.
 - A one-line legend explains what high, medium and low mean in terms of action ("check before payroll goes out").
+- **"How entries are flagged" panel:** a collapsed section that lists every rule, its threshold and its severity, so the PM can see why something was flagged without asking. The text is built from the threshold constants (`RULE_DESCRIPTIONS` in `anomalies.ts`), so changing a threshold updates the panel too, and a test checks that the quoted numbers match.
+- **Employee table:** the header and Name column stay in place while scrolling, because it has 20 columns and is wider than a laptop screen. Divider lines separate the hours, standard, overtime and benefits groups.
+- **Secondary stats are grouped** under Workforce / Hours / Average rates, so related numbers sit together.
 
 ## Employee table: plain averages, with flags alongside
 - The min / avg / max rate columns use the plain mean, as the brief asks for "average". A spike week does pull an employee's average up or down, but that is visible: the min or max column shows the outlier, and the "Flagged weeks" column shows that the employee has flagged weeks.

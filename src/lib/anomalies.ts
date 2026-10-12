@@ -40,6 +40,43 @@ export const RULE_LABELS: Record<RuleId, string> = {
   'name-on-multiple-ids': 'Name on several IDs',
 }
 
+// Plain-English description of each rule, shown in the "How entries are flagged" panel.
+// Built from the threshold constants, so the panel always matches what the rules check.
+export const RULE_DESCRIPTIONS: Record<RuleId, { when: string; severity: string }> = {
+  'rate-deviation': {
+    when: `Standard rate is more than ${RATE_DEVIATION_LIMIT * 100}% above or below the employee's usual (median) rate. Needs at least ${MIN_WEEKS_FOR_RATE_BASELINE} weeks of history.`,
+    severity: 'High',
+  },
+  'weekly-hours-high': { when: `More than ${WEEKLY_HOURS_HIGH} hours in one week.`, severity: 'High' },
+  'daily-hours-high': { when: `More than ${DAILY_HOURS_HIGH} hours in one day.`, severity: 'High' },
+  'ot-rate-below-st': { when: 'Overtime rate is lower than the standard rate.', severity: 'High' },
+  'duplicate-week': { when: 'The same employee has two entries for the same week.', severity: 'High' },
+  'invalid-data': {
+    when: 'A value is blank, not a number, negative, or not a real date. The entry is left out of all totals.',
+    severity: 'High',
+  },
+  'name-mismatch': {
+    when: 'The name differs from the one usually used for that employee ID. High if the first name differs (possibly a different person), medium for a spelling difference.',
+    severity: 'High / Medium',
+  },
+  'daily-st-high': {
+    when: `More than ${DAILY_ST_MAX} standard hours in one day; hours past ${DAILY_ST_MAX} are usually overtime.`,
+    severity: 'Medium',
+  },
+  'apprentice-over-journeyworker': {
+    when: "Apprentice's rate is above the typical journeyworker rate in the same trade.",
+    severity: 'Medium',
+  },
+  'ot-without-st': { when: 'Overtime on a day with no standard hours.', severity: 'Medium' },
+  'non-saturday-week': { when: 'The week-ending date is not a Saturday.', severity: 'Medium' },
+  'weekly-hours-low': { when: `Fewer than ${WEEKLY_HOURS_LOW} hours in one week.`, severity: 'Low' },
+  'daily-hours-low': { when: `A day worked for fewer than ${DAILY_HOURS_LOW} hours.`, severity: 'Low' },
+  'name-on-multiple-ids': {
+    when: 'The same name appears under more than one employee ID (could be two people).',
+    severity: 'Low',
+  },
+}
+
 // Lower number = more severe; used for sorting.
 const SEVERITY_ORDER: Record<Severity, number> = { high: 0, medium: 1, low: 2 }
 
