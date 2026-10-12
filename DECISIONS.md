@@ -17,6 +17,14 @@ Tradeoffs made while building this dashboard, and why. Updated as the work progr
 - The React components only display results. Parsing, stats and anomaly rules are plain functions with no UI dependencies.
 - This makes the rules easy to unit test and easy to reuse later (for example on a server or in a CLI).
 
+## Invalid rows are excluded, not guessed
+- A row with a blank, non-numeric or negative value, an unknown level, or an invalid date is **left out of all calculations** and listed as a high-severity data issue. All of its problems are reported together.
+- Filling in zeros or defaults would quietly distort the totals.
+- A week ending that is a real date but not a Saturday is **kept** and flagged as medium severity. The numbers are still usable; only the label looks wrong.
+- The current file has none of these problems, but the checks protect against future uploads.
+- Dates are parsed by hand (MM/DD/YYYY) and checked to round-trip, because `new Date()` silently turns "02/30" into March 2.
+- `employee_id` is kept as text. It is an identifier, not a quantity, so no arithmetic is ever done on it.
+
 ## Thresholds come from the observed data
 The data was profiled before choosing any thresholds:
 - **Rate deviation.** Every row is either exactly at the employee's usual rate or at least 46% away from it, so any threshold between 10% and 40% flags the same 6 rows. **20%** was chosen.
