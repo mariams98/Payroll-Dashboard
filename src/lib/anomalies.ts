@@ -1,4 +1,4 @@
-import { formatMoney, formatWholeMoney } from './format'
+import { formatMoney } from './format'
 import { groupBy, median, roundHours } from './math'
 import {
   DAILY_HOURS_HIGH,
@@ -51,6 +51,7 @@ export interface FlaggedRow {
   weekEnding: string
   severity: Severity // the most severe of its anomalies
   anomalies: Anomaly[]
+  costImpact?: number // sum of its anomalies' cost impacts; undefined if none has one
 }
 
 // Combine anomalies for the same CSV row, most severe rows first, then in file order.
@@ -59,7 +60,9 @@ export function groupAnomaliesByRow(anomalies: Anomaly[], names: Map<string, str
   for (const rowAnomalies of groupBy(anomalies, (a) => String(a.rowNumber)).values()) {
     const first = rowAnomalies[0]
     const sorted = [...rowAnomalies].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity])
+    const impacts = rowAnomalies.filter((a) => a.costImpact !== undefined).map((a) => a.costImpact ?? 0)
     rows.push({
+      costImpact: impacts.length > 0 ? impacts.reduce((total, i) => total + i, 0) : undefined,
       rowNumber: first.rowNumber,
       employeeId: first.employeeId,
       name: names.get(first.employeeId) ?? '', // unknown if every row for this ID was invalid
@@ -124,16 +127,14 @@ export function findRateDeviations(records: WeekRecord[]): Anomaly[] {
           row.stHours * (row.standardRate - typicalRate) +
           row.otHours * (row.overtimeRate - typicalOvertimeRate) +
           row.totalHours * (row.benefitsRate - typicalBenefitsRate)
-        const impactText = `${formatWholeMoney(Math.abs(costImpact))} ${costImpact > 0 ? 'more' : 'less'}`
-
+        // The amount is shown in its own "Cost impact" column, so it isn't repeated in the message.
         const anomaly = flag(
           row,
           'rate-deviation',
           'high',
           `Standard rate ${formatMoney(row.standardRate)} is ${percent}% ${direction} ` +
             `${names.get(employeeId)}'s typical ${formatMoney(typicalRate)} ` +
-            `(OT ${formatMoney(row.overtimeRate)}, benefits ${formatMoney(row.benefitsRate)}). ` +
-            `This week cost about ${impactText} than at the usual rates.`,
+            `(OT ${formatMoney(row.overtimeRate)}, benefits ${formatMoney(row.benefitsRate)})`,
         )
         anomaly.costImpact = costImpact
         anomalies.push(anomaly)

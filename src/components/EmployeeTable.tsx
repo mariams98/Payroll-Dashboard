@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatHours, formatMoney, formatWholeMoney } from '../lib/format'
+import { formatHours, formatLevel, formatMoney, formatWholeMoney } from '../lib/format'
 import type { EmployeeStats } from '../lib/stats'
 
 type SortKey = keyof EmployeeStats
@@ -98,7 +98,8 @@ function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
             <tr key={employee.employeeId}>
               {COLUMNS.map((column) => {
                 const value = employee[column.key]
-                const text = column.format && typeof value === 'number' ? column.format(value) : String(value)
+                let text = column.format && typeof value === 'number' ? column.format(value) : String(value)
+                if (column.key === 'level') text = formatLevel(text) // "JOURNEYWORKER" -> "Journeyworker"
                 let className = typeof value === 'number' ? 'number' : undefined
                 if (column.key === 'flaggedWeeks' && employee.flaggedWeeks > 0) className = 'number flagged'
                 return (

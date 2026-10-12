@@ -85,14 +85,11 @@ describe('findRateDeviations', () => {
     const records = [40, 40, 40, 100].map((rate) => makeRecord({ standardRate: rate }))
     const anomaly = findRateDeviations(records)[0]
     expect(anomaly.costImpact).toBe(2400)
-    expect(anomaly.message).toContain('about $2,400 more than at the usual rates')
   })
 
-  it('reports a rate drop as costing less', () => {
+  it('reports a rate drop as a negative cost impact', () => {
     const records = [40, 40, 40, 20].map((rate) => makeRecord({ standardRate: rate }))
-    const anomaly = findRateDeviations(records)[0]
-    expect(anomaly.costImpact).toBe(-800)
-    expect(anomaly.message).toContain('$800 less')
+    expect(findRateDeviations(records)[0].costImpact).toBe(-800)
   })
 
   it('flags a drop as well as a spike', () => {
@@ -411,6 +408,10 @@ describe('detectAnomalies on the real data file', () => {
     const spike = rows.find((r) => r.employeeId === '1001' && r.weekEnding === '03/15/2025')
     expect(spike?.anomalies.map((a) => a.rule)).toEqual(['rate-deviation', 'apprentice-over-journeyworker'])
     expect(spike?.name).toBe("Kamille O'Reilly")
+    // Cost impact carried onto the row for the table's column (independent script: $2,896.98).
+    expect(spike?.costImpact).toBeCloseTo(2896.98, 2)
+    // Rows without a pay-rate problem have no cost impact.
+    expect(rows.find((r) => r.anomalies[0].rule === 'weekly-hours-high')?.costImpact).toBeUndefined()
   })
 
   it('flags the misspelled or mismatched names, not the usual spelling', () => {
