@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import csvText from '../../public/payroll_data.csv?raw'
 import {
+  canonicalNames,
   detectAnomalies,
   findApprenticesPaidAboveJourneyworkers,
   findDuplicateWeeks,
@@ -12,11 +13,12 @@ import {
   findRateDeviations,
   findStandardHoursOverDailyMax,
   findWeeklyHours,
+  groupAnomaliesByRow,
 } from './anomalies'
 import { roundHours } from './math'
 import { normalizeRows, parseCsv, parseWeekEnding } from './parse'
 import { DAYS } from './types'
-import type { WeekRecord } from './types'
+import type { Anomaly, WeekRecord } from './types'
 
 interface RecordOptions {
   employeeId?: string
@@ -254,6 +256,36 @@ describe('findNamesOnMultipleIds', () => {
   })
 })
 
+describe('groupAnomaliesByRow', () => {
+  const anomaly = (rowNumber: number, severity: Anomaly['severity'], rule: Anomaly['rule']): Anomaly => ({
+    rule,
+    severity,
+    message: '',
+    rowNumber,
+    employeeId: '1',
+    weekEnding: '03/01/2025',
+  })
+
+  it('combines anomalies for the same row and uses the most severe one', () => {
+    const rows = groupAnomaliesByRow(
+      [anomaly(5, 'medium', 'daily-st-high'), anomaly(5, 'high', 'weekly-hours-high')],
+      new Map([['1', 'Test Person']]),
+    )
+    expect(rows).toHaveLength(1)
+    expect(rows[0].severity).toBe('high')
+    expect(rows[0].name).toBe('Test Person')
+    expect(rows[0].anomalies.map((a) => a.rule)).toEqual(['weekly-hours-high', 'daily-st-high'])
+  })
+
+  it('sorts rows by severity, then by line number', () => {
+    const rows = groupAnomaliesByRow(
+      [anomaly(9, 'low', 'weekly-hours-low'), anomaly(7, 'high', 'rate-deviation'), anomaly(3, 'high', 'rate-deviation')],
+      new Map(),
+    )
+    expect(rows.map((r) => r.rowNumber)).toEqual([3, 7, 9])
+  })
+})
+
 describe('detectAnomalies on the real data file', () => {
   // Expected rows come from profiling the data before writing the rules, so these
   // check that each rule flags the right rows, not just the right number of rows.
@@ -323,6 +355,17 @@ describe('detectAnomalies on the real data file', () => {
       '1019 06/07/2025',
       '1021 03/01/2025',
     ])
+  })
+
+  it('groups into 17 flagged rows: 14 high, then the 3 medium name mismatches', () => {
+    const rows = groupAnomaliesByRow(anomalies, canonicalNames(parseCsv(csvText).records))
+    expect(rows).toHaveLength(17)
+    expect(rows.filter((r) => r.severity === 'high')).toHaveLength(14)
+    expect(rows.slice(14).every((r) => r.anomalies[0].rule === 'name-mismatch')).toBe(true)
+    // 1001's spike week is flagged by two rules but appears once.
+    const spike = rows.find((r) => r.employeeId === '1001' && r.weekEnding === '03/15/2025')
+    expect(spike?.anomalies.map((a) => a.rule)).toEqual(['rate-deviation', 'apprentice-over-journeyworker'])
+    expect(spike?.name).toBe("Kamille O'Reilly")
   })
 
   it('flags the misspelled or mismatched names, not the usual spelling', () => {

@@ -108,3 +108,46 @@ td.number {
 tbody tr:hover {
   background: #f9fafb;
 }
+
+.muted {
+  color: #6b7280;
+}
+
+/* Anomaly table */
+td.reasons {
+  white-space: normal; /* messages are long; let them wrap */
+  min-width: 360px;
+}
+
+td.reasons ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+td {
+  vertical-align: top;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-low {
+  background: #e0f2fe;
+  color: #075985;
+}

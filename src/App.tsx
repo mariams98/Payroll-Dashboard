@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import AnomalyTable from './components/AnomalyTable'
 import EmployeeTable from './components/EmployeeTable'
 import SummaryCards from './components/SummaryCards'
-import { detectAnomalies } from './lib/anomalies'
+import { canonicalNames, detectAnomalies, groupAnomaliesByRow } from './lib/anomalies'
 import { parseCsv } from './lib/parse'
 import { employeeStats, summarize, summarizeAnomalies } from './lib/stats'
 
@@ -27,12 +28,15 @@ function App() {
     // Data problems found while parsing and the rule-based anomalies go in one list,
     // so the summary and the anomaly table always see both.
     const anomalies = [...issues, ...detectAnomalies(records)]
+    const flaggedRows = groupAnomaliesByRow(anomalies, canonicalNames(records))
     return {
       recordCount: records.length,
       issueCount: issues.length,
       summary: summarize(records),
-      anomalySummary: summarizeAnomalies(anomalies),
+      // Built from the same grouped rows as the anomaly table, so the counts always match.
+      anomalySummary: summarizeAnomalies(flaggedRows),
       employees: employeeStats(records, anomalies),
+      flaggedRows,
     }
   }, [csvText])
 
@@ -58,6 +62,13 @@ function App() {
             <EmployeeTable employees={data.employees} />
           </section>
         </>
+      )}
+      {/* Shown even with no valid rows, since then it lists why every row was rejected. */}
+      {data && (
+        <section>
+          <h2>Anomalies ({data.flaggedRows.length} flagged rows)</h2>
+          <AnomalyTable rows={data.flaggedRows} />
+        </section>
       )}
     </main>
   )

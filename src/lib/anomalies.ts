@@ -20,6 +20,57 @@ const DAY_LABELS: Record<Day, string> = {
   sun: 'Sun',
 }
 
+// Short names for each rule, shown next to the message in the anomaly table.
+// Typed as Record<RuleId, string> so adding a rule without a label is a type error.
+export const RULE_LABELS: Record<RuleId, string> = {
+  'invalid-data': 'Invalid data',
+  'non-saturday-week': 'Week not ending Saturday',
+  'rate-deviation': 'Unusual pay rate',
+  'apprentice-over-journeyworker': 'Apprentice above journeyworker',
+  'ot-rate-below-st': 'OT rate below ST rate',
+  'daily-hours-high': 'Very long day',
+  'daily-st-high': `Over ${DAILY_ST_MAX} ST hours in a day`,
+  'weekly-hours-high': 'Very long week',
+  'weekly-hours-low': 'Very short week',
+  'ot-without-st': 'OT without ST',
+  'duplicate-week': 'Duplicate week',
+  'name-mismatch': 'Name mismatch',
+  'name-on-multiple-ids': 'Name on several IDs',
+}
+
+// Lower number = more severe; used for sorting.
+const SEVERITY_ORDER: Record<Severity, number> = { high: 0, medium: 1, low: 2 }
+
+// One CSV row with every reason it was flagged.
+export interface FlaggedRow {
+  rowNumber: number
+  employeeId: string
+  name: string
+  weekEnding: string
+  severity: Severity // the most severe of its anomalies
+  anomalies: Anomaly[]
+}
+
+// Combine anomalies for the same CSV row, most severe rows first, then in file order.
+export function groupAnomaliesByRow(anomalies: Anomaly[], names: Map<string, string>): FlaggedRow[] {
+  const rows: FlaggedRow[] = []
+  for (const rowAnomalies of groupBy(anomalies, (a) => String(a.rowNumber)).values()) {
+    const first = rowAnomalies[0]
+    const sorted = [...rowAnomalies].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity])
+    rows.push({
+      rowNumber: first.rowNumber,
+      employeeId: first.employeeId,
+      name: names.get(first.employeeId) ?? '', // unknown if every row for this ID was invalid
+      weekEnding: first.weekEnding,
+      severity: sorted[0].severity,
+      anomalies: sorted,
+    })
+  }
+  return rows.sort(
+    (a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] || a.rowNumber - b.rowNumber,
+  )
+}
+
 // Build an anomaly for one record, so every rule doesn't repeat the row details.
 function flag(record: WeekRecord, rule: RuleId, severity: Severity, message: string): Anomaly {
   return {

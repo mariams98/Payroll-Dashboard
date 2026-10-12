@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import csvText from '../../public/payroll_data.csv?raw'
-import { detectAnomalies } from './anomalies'
+import { detectAnomalies, groupAnomaliesByRow } from './anomalies'
 import { parseCsv } from './parse'
 import { employeeStats, summarize, summarizeAnomalies } from './stats'
 import type { Anomaly } from './types'
@@ -73,7 +73,7 @@ describe('employeeStats', () => {
 })
 
 describe('summarizeAnomalies', () => {
-  it('counts by severity and counts each flagged row once', () => {
+  it('counts each flagged row once, by its most severe anomaly', () => {
     const anomaly = (rowNumber: number, severity: Anomaly['severity']): Anomaly => ({
       rule: 'rate-deviation',
       severity,
@@ -82,7 +82,13 @@ describe('summarizeAnomalies', () => {
       employeeId: '1',
       weekEnding: '03/01/2025',
     })
-    const result = summarizeAnomalies([anomaly(2, 'high'), anomaly(2, 'medium'), anomaly(5, 'low')])
-    expect(result).toEqual({ high: 1, medium: 1, low: 1, flaggedRows: 2 })
+    // Row 2 has a high and a medium hit, so it counts as one high row.
+    const rows = groupAnomaliesByRow([anomaly(2, 'high'), anomaly(2, 'medium'), anomaly(5, 'low')], new Map())
+    expect(summarizeAnomalies(rows)).toEqual({ high: 1, medium: 0, low: 1, flaggedRows: 2 })
+  })
+
+  it('matches the anomaly table on the real data: 14 high rows and 3 medium rows', () => {
+    const rows = groupAnomaliesByRow(detectAnomalies(records), new Map())
+    expect(summarizeAnomalies(rows)).toEqual({ high: 14, medium: 3, low: 0, flaggedRows: 17 })
   })
 })

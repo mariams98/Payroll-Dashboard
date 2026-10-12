@@ -1,4 +1,5 @@
 import { canonicalNames } from './anomalies'
+import type { FlaggedRow } from './anomalies'
 import { groupBy, median, roundHours } from './math'
 import type { Anomaly, WeekRecord } from './types'
 
@@ -21,11 +22,13 @@ export interface Summary {
   typicalBenefitsRate: number
 }
 
+// Counts flagged rows (not individual rule hits), by each row's most severe anomaly,
+// so the numbers match the anomaly table.
 export interface AnomalySummary {
   high: number
   medium: number
   low: number
-  flaggedRows: number // distinct CSV rows with at least one anomaly
+  flaggedRows: number
 }
 
 // One row of the employee table. Kept flat so any column can be sorted by its key.
@@ -98,12 +101,12 @@ export function summarize(records: WeekRecord[]): Summary {
   }
 }
 
-export function summarizeAnomalies(anomalies: Anomaly[]): AnomalySummary {
+export function summarizeAnomalies(rows: FlaggedRow[]): AnomalySummary {
   return {
-    high: anomalies.filter((a) => a.severity === 'high').length,
-    medium: anomalies.filter((a) => a.severity === 'medium').length,
-    low: anomalies.filter((a) => a.severity === 'low').length,
-    flaggedRows: new Set(anomalies.map((a) => a.rowNumber)).size,
+    high: rows.filter((r) => r.severity === 'high').length,
+    medium: rows.filter((r) => r.severity === 'medium').length,
+    low: rows.filter((r) => r.severity === 'low').length,
+    flaggedRows: rows.length,
   }
 }
 
