@@ -265,11 +265,6 @@ a.card-link:focus-visible {
   border-color: #075985;
 }
 
-/* Supporting reasons ("Over 8 ST hours" next to a stronger reason) are de-emphasized */
-ul.reasons li.secondary {
-  color: #6b7280;
-  font-size: 0.8125rem;
-}
 
 th.number {
   text-align: right;

@@ -14,8 +14,9 @@ const SEVERITY_HELP: Record<Severity, string> = {
 
 const SEVERITIES: Severity[] = ['high', 'medium', 'low']
 
-// "Over 8 ST hours" always appears together with a stronger reason in this data,
-// so when a row has other reasons it is shown smaller, as supporting detail.
+// "Over 8 ST hours" always appears together with a stronger reason in this data, so in the
+// collapsed issues list it is greyed out when the row has other reasons. The expanded view
+// shows every reason at full weight, since the user asked for the details.
 function isSecondary(anomaly: Anomaly, row: FlaggedRow): boolean {
   return anomaly.rule === 'daily-st-high' && row.anomalies.length > 1
 }
@@ -42,7 +43,7 @@ function RowDetails({ row, record }: { row: FlaggedRow; record?: WeekRecord }) {
     <div className="row-details">
       <ul className="reasons">
         {row.anomalies.map((anomaly, i) => (
-          <li key={i} className={isSecondary(anomaly, row) ? 'secondary' : undefined}>
+          <li key={i}>
             <strong>{RULE_LABELS[anomaly.rule]}:</strong> {anomaly.message}
           </li>
         ))}
