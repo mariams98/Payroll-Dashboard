@@ -474,3 +474,18 @@ td.issues {
 .day-table td {
   padding: 4px 10px;
 }
+
+/* Sort indicators in the employee table header: faint on every column, dark on the active one */
+.sort-icon {
+  margin-left: 4px;
+  font-size: 0.75rem;
+  color: #c4c9d1;
+}
+
+.sort-icon.active {
+  color: #1f2937;
+}
+
+th button:hover .sort-icon {
+  color: #6b7280;
+}

@@ -99,7 +99,17 @@ function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
               >
                 <button type="button" onClick={() => handleSort(column.key)}>
                   {column.label}
-                  {column.key === sortKey ? (ascending ? ' ▲' : ' ▼') : ''}
+                  {/* Every header shows it can be sorted: a faint ↕, or a dark ▲/▼ on the active column.
+                      aria-hidden because aria-sort already tells screen readers the sort state. */}
+                  {column.key === sortKey ? (
+                    <span className="sort-icon active" aria-hidden="true">
+                      {ascending ? '▲' : '▼'}
+                    </span>
+                  ) : (
+                    <span className="sort-icon" aria-hidden="true">
+                      ↕
+                    </span>
+                  )}
                 </button>
               </th>
             ))}
