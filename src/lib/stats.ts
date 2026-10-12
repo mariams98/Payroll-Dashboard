@@ -20,6 +20,8 @@ export interface Summary {
   typicalStandardRate: number
   typicalOvertimeRate: number
   typicalBenefitsRate: number
+  // What was actually paid per standard hour on average: ST pay ÷ ST hours.
+  hoursWeightedStandardRate: number
 }
 
 // Counts flagged rows (not individual rule hits), by each row's most severe anomaly,
@@ -77,6 +79,8 @@ export function summarize(records: WeekRecord[]): Summary {
   const overtimeHours = sum(records.map((r) => r.otHours))
   const apprenticeHours = sum(records.filter((r) => r.level === 'APPRENTICE').map((r) => r.totalHours))
   const grossPay = sum(records.map((r) => r.grossPay))
+  const standardHours = sum(records.map((r) => r.stHours))
+  const standardPay = sum(records.map((r) => r.stHours * r.standardRate))
   const benefitsCost = sum(records.map((r) => r.benefitsCost))
 
   const typicalRate = (getRate: (r: WeekRecord) => number) =>
@@ -96,6 +100,7 @@ export function summarize(records: WeekRecord[]): Summary {
     benefitsCost,
     totalCost: grossPay + benefitsCost,
     typicalStandardRate: typicalRate((r) => r.standardRate),
+    hoursWeightedStandardRate: standardHours === 0 ? 0 : standardPay / standardHours,
     typicalOvertimeRate: typicalRate((r) => r.overtimeRate),
     typicalBenefitsRate: typicalRate((r) => r.benefitsRate),
   }

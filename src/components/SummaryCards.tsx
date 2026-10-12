@@ -43,7 +43,9 @@ function SummaryCards({ summary, anomalySummary }: Props) {
     {
       label: 'Typical standard rate',
       value: formatMoney(summary.typicalStandardRate),
-      detail: `OT ${formatMoney(summary.typicalOvertimeRate)}, benefits ${formatMoney(summary.typicalBenefitsRate)}`,
+      detail:
+        `Hours-weighted average ${formatMoney(summary.hoursWeightedStandardRate)}. ` +
+        `Typical OT ${formatMoney(summary.typicalOvertimeRate)}, benefits ${formatMoney(summary.typicalBenefitsRate)}`,
     },
     {
       label: 'Flagged rows',
@@ -65,7 +67,8 @@ function SummaryCards({ summary, anomalySummary }: Props) {
       </div>
       <p className="note">
         Totals include every row as submitted, including flagged rows. Typical rates are the median
-        of each employee's usual rate, so one-off spikes don't skew them.
+        of each employee's usual rate, so one-off spikes don't skew them. The hours-weighted average
+        is what was actually paid per standard hour across all rows.
       </p>
     </>
   )

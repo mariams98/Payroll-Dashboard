@@ -61,10 +61,20 @@ The data was profiled before choosing any thresholds:
 - This is an open question for the client (see QUESTIONS.md).
 
 ## Employee table: plain averages, with flags alongside
-- The min / avg / max rate columns use the plain mean, as the brief asks for "average". A spike week does pull an employee's average up or down, but that is visible: the min or max column shows the outlier, and the "Flags" column shows that the row was flagged.
+- The min / avg / max rate columns use the plain mean, as the brief asks for "average". A spike week does pull an employee's average up or down, but that is visible: the min or max column shows the outlier, and the "Flagged weeks" column shows that the employee has flagged weeks.
 - The "typical" rates on the summary cards use medians instead, because they describe the whole crew.
 - An employee's level and trade are taken from their first row. No one changes level or trade in this data; if an apprentice moved up mid-project, the table would show their starting level.
 - The table is a plain HTML table, with sorting done by `useState` plus `Array.sort` and no table library. Every column is a flat field on `EmployeeStats`, so a single comparison function sorts any column.
+
+## Which "average" each number uses
+- **Summary "Typical standard rate" ($43.41)** is the median of each employee's median rate. It describes a typical worker and ignores spike weeks.
+- **Summary "Hours-weighted average" ($41.59)** is standard pay ÷ standard hours across all rows. It is what was actually paid per standard hour, and it is shown on the same card so a spot-check with a spreadsheet matches.
+- The two differ because the typical rate counts each employee once, regardless of how many hours they worked. For comparison, the plain average of all 263 weekly rates is $41.68.
+- **Employee table "Avg" rate** is the unweighted mean of that employee's weekly rates, **including** flagged weeks.
+- **Employee table "Avg" hours per day** is the mean over days actually worked, with each worked day counting equally.
+
+## Numbers verified independently
+- A standalone script that reads only the CSV (no app code) reproduced every summary card, all 368 numeric cells of the employee table, and the flagged-row count for every rule, with 0 mismatches.
 
 ## Daily-hours stats only count days actually worked
 - Most weeks have days with 0 hours (weekends, days off). Including them would make every employee's minimum 0 and pull the average down.

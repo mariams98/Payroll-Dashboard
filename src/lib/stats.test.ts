@@ -35,6 +35,10 @@ describe('summarize on the real data file', () => {
     expect(summary.typicalBenefitsRate).toBe(16.25)
   })
 
+  it('computes the hours-weighted standard rate (ST pay ÷ ST hours)', () => {
+    expect(summary.hoursWeightedStandardRate).toBeCloseTo(41.59, 2)
+  })
+
   it('counts weeks by date, so differently formatted dates are the same week', () => {
     const [header, firstRow, secondRow] = csvText.split('\n')
     // Both rows are week ending 03/01/2025; write the second one as 3/1/2025.
