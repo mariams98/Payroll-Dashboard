@@ -36,9 +36,22 @@ The data was profiled before choosing any thresholds:
 - **Weekly hours.** The 95th percentile is 48.8 h, and the next values jump to 85–88 h. The flag is set at **> 60 h**.
 - All thresholds live in one file (`thresholds.ts`) so they are easy to discuss and tune with the client.
 
+## How anomalies are reported
+- Each rule is a separate pure function in `src/lib/anomalies.ts`, and `detectAnomalies` runs them all. A rule can be tested, tuned or removed on its own.
+- **A rule flags a row at most once.** Day-level rules (e.g. "standard hours above 8") list every affected day in one message ("Mon 9.4h, Wed 9.5h") instead of one entry per day. A blow-out week would otherwise produce 7 near-identical entries.
+- A row can still be flagged by several different rules. The UI groups them by row.
+- **Severity** reflects how likely the row is to be wrong and how much it could cost:
+  - **high:** money directly affected or physically implausible (rate jumps, OT paid below ST, more than 16 h in a day, more than 60 h in a week, duplicate weeks, unreadable rows)
+  - **medium:** probably a data-entry mistake (more than 8 ST in a day, apprentice paid above journeyworkers, OT with no ST, name typos)
+  - **low:** could be legitimate (very short weeks, two people sharing a name)
+- **Identity checks run both ways:** an ID used with several names, and a name used under several IDs. The second is low severity because two employees can share a name.
+- An employee whose typical rate is $0 is skipped by the rate-deviation rule, because a percentage change from zero is meaningless.
+
 ## Median, not mean, for the "typical" rate
 - An employee's baseline rate is the **median** of their weekly rates. A single spike (for example +131%) would drag the mean toward itself and partly hide the spike.
 - Dashboard-level average rates use the median of the per-employee medians for the same reason.
+- **Employees with fewer than 3 weeks are skipped** by the rate check. With only $40 and $100, the median is $70 and both weeks would be flagged, including the correct one.
+- **Limitation: a legitimate mid-project raise confuses the median.** With 8 weeks at $40 and 6 at $50, the median is $40 and all six $50 weeks get flagged. With 7 and 7, the median is $45 and nothing is flagged. Every employee in this data has one constant rate apart from the spikes, so this doesn't happen here. Handling raises properly needs the client's list of approved rate changes (see QUESTIONS.md), or a baseline based on the previous few weeks instead of the whole project.
 
 ## Overtime looks like it is defined per day
 - About 40 normal-looking weeks have more than 40 standard hours, yet daily standard hours never exceed 8 on normal days.

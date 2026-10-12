@@ -41,12 +41,13 @@ export type RuleId =
   | 'apprentice-over-journeyworker'
   | 'ot-rate-below-st'
   | 'daily-hours-high'
-  | 'daily-st-over-8'
+  | 'daily-st-high'
   | 'weekly-hours-high'
   | 'weekly-hours-low'
   | 'ot-without-st'
   | 'duplicate-week'
   | 'name-mismatch'
+  | 'name-on-multiple-ids'
 
 // One reason a row was flagged. A row can have several.
 export interface Anomaly {

@@ -1,4 +1,5 @@
 import Papa from 'papaparse'
+import { roundHours } from './math'
 import { DAYS } from './types'
 import type { Anomaly, DayHours, RawRow, WeekRecord } from './types'
 
@@ -22,12 +23,6 @@ export function parseCsv(text: string): ParseResult {
   }
 
   return normalizeRows(result.data, parserProblems)
-}
-
-// Hours in the file have one decimal, but adding floats drifts (7.3 + 6.6 + ... = 40.89999999999999).
-// Rounding to 2 decimals keeps totals exact so threshold comparisons like "> 60" are reliable.
-function roundHours(hours: number): number {
-  return Math.round(hours * 100) / 100
 }
 
 // Turn "MM/DD/YYYY" into a Date, or null if the text is not a real date (e.g. 02/30/2025).
