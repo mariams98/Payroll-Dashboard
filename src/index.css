@@ -351,6 +351,17 @@ tbody tr:hover td.sticky-col {
   background: #f9fafb;
 }
 
+/* Employee table: alternating white / grey rows so the eye can follow a row across 20 columns.
+   Set on the cells (not the row) so the sticky Name cell stripes too. */
+.table-scroll tbody tr:nth-child(even) td {
+  background: #f3f4f6;
+}
+
+/* Hover is a shade darker than the stripe so it stays visible on grey rows. */
+.table-scroll tbody tr:hover td {
+  background: #e5e7eb;
+}
+
 /* Divider before each min/avg/max group */
 .group-start {
   border-left: 1px solid #e5e7eb;
