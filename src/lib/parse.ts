@@ -10,7 +10,24 @@ export interface ParseResult {
 // Parse the raw CSV text into clean records plus a list of data problems.
 export function parseCsv(text: string): ParseResult {
   const result = Papa.parse<RawRow>(text, { header: true, skipEmptyLines: true })
-  return normalizeRows(result.data)
+
+  // PapaParse reports structural problems (e.g. a row with too many fields) separately
+  // from the data, keyed by row index. Collect them so those rows get flagged too.
+  const parserProblems = new Map<number, string[]>()
+  for (const error of result.errors) {
+    if (error.row === undefined) continue
+    const problems = parserProblems.get(error.row) ?? []
+    problems.push(error.message)
+    parserProblems.set(error.row, problems)
+  }
+
+  return normalizeRows(result.data, parserProblems)
+}
+
+// Hours in the file have one decimal, but adding floats drifts (7.3 + 6.6 + ... = 40.89999999999999).
+// Rounding to 2 decimals keeps totals exact so threshold comparisons like "> 60" are reliable.
+function roundHours(hours: number): number {
+  return Math.round(hours * 100) / 100
 }
 
 // Turn "MM/DD/YYYY" into a Date, or null if the text is not a real date (e.g. 02/30/2025).
@@ -30,13 +47,16 @@ export function parseWeekEnding(text: string): Date | null {
 
 // Validate each row and compute its totals. Rows with unusable values are left out
 // of the records and reported as issues instead, so they can't distort the totals.
-export function normalizeRows(rows: RawRow[]): ParseResult {
+export function normalizeRows(
+  rows: RawRow[],
+  parserProblems: Map<number, string[]> = new Map(),
+): ParseResult {
   const records: WeekRecord[] = []
   const issues: Anomaly[] = []
 
   rows.forEach((row, index) => {
     const rowNumber = index + 2 // +1 for the header line, +1 because lines are counted from 1
-    const problems: string[] = []
+    const problems: string[] = [...(parserProblems.get(index) ?? [])]
 
     const readText = (field: string): string => {
       const value = (row[field] ?? '').trim()
@@ -119,7 +139,9 @@ export function normalizeRows(rows: RawRow[]): ParseResult {
       stHours += d.st
       otHours += d.ot
     }
-    const totalHours = stHours + otHours
+    stHours = roundHours(stHours)
+    otHours = roundHours(otHours)
+    const totalHours = roundHours(stHours + otHours)
     const grossPay = stHours * standardRate + otHours * overtimeRate
     const benefitsCost = totalHours * benefitsRate
 

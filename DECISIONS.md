@@ -25,6 +25,10 @@ Tradeoffs made while building this dashboard, and why. Updated as the work progr
 - Dates are parsed by hand (MM/DD/YYYY) and checked to round-trip, because `new Date()` silently turns "02/30" into March 2.
 - `employee_id` is kept as text. It is an identifier, not a quantity, so no arithmetic is ever done on it.
 
+## Rounding: hours when parsing, money only when displaying
+- Adding decimal hours in JavaScript drifts (7.3 + 6.6 + ... gives 40.89999999999999 instead of 40.9). 82 of the 263 weekly totals were affected. Since the anomaly rules compare against thresholds like "> 60 hours", weekly hour totals are rounded to 2 decimals when parsed.
+- Money (pay, benefits, cost) is kept unrounded and only formatted to cents when displayed. A real payroll system rounds each line to the cent, so the dashboard's totals may differ from the actual payroll by a few cents. That is acceptable for an overview, but a reconciliation tool would need to round per row (see QUESTIONS.md).
+
 ## Thresholds come from the observed data
 The data was profiled before choosing any thresholds:
 - **Rate deviation.** Every row is either exactly at the employee's usual rate or at least 46% away from it, so any threshold between 10% and 40% flags the same 6 rows. **20%** was chosen.
@@ -64,3 +68,10 @@ The data was profiled before choosing any thresholds:
 
 ## Weekend work is not flagged
 - About 100 rows include Saturday or Sunday hours, so weekend work is a normal pattern on this project.
+
+## Known limitations (found in code review, deliberately not fixed yet)
+- **Row numbers after blank lines.** Blank lines are skipped before rows are numbered, so a row after a blank line is reported one line too early. The current file has no blank lines.
+- **Years before 100.** `new Date()` maps a year like 0099 to 1999, and the date check doesn't compare the year.
+- **Keys must not use `toISOString()`.** Dates are built in local time, so converting them with `toISOString()` can shift them a day in some timezones. Group by `weekEndingRaw` or `getTime()` instead.
+- **`level` is typed as plain text,** not `'APPRENTICE' | 'JOURNEYWORKER'`, even though the parser validates it.
+- **A file with a wrong or missing column** produces one "is blank" error per row instead of a single "missing column" message. **An empty file** produces no records and no issues.

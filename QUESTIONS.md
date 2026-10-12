@@ -7,6 +7,7 @@ Open questions that would change how the dashboard calculates or flags things. U
 - Do rates legitimately change during a project, for example raises, apprentice step-ups, or prevailing-wage updates? If so, is there a list of approved effective dates?
 - Is overtime always 1.5× the standard rate? (It is in every row.) Are any hours paid at double time, such as Sundays or holidays?
 - Do benefits apply to overtime hours as well as standard hours? (The dashboard currently assumes yes.)
+- Does the dashboard need to match payroll to the cent? If so, how is pay rounded: per day, per week, or per pay line?
 
 ## Hours and overtime
 - Is overtime counted per day (over 8 hours) or per week (over 40 hours)? The data looks like daily overtime, because weeks over 40 standard hours are common.

@@ -69,6 +69,22 @@ describe('normalizeRows', () => {
     expect(issues[0].message).toContain('employee_name is blank')
   })
 
+  it('excludes a row with an unknown level or a non-numeric employee_id', () => {
+    const { records, issues } = normalizeRows([
+      makeRow({ level: 'FOREMAN' }),
+      makeRow({ employee_id: 'A12' }),
+    ])
+    expect(records).toHaveLength(0)
+    expect(issues[0].message).toContain('level is not APPRENTICE or JOURNEYWORKER')
+    expect(issues[1].message).toContain('employee_id is not numeric')
+  })
+
+  it('reports the CSV line number of the row that has the problem', () => {
+    const { records, issues } = normalizeRows([makeRow(), makeRow(), makeRow({ week_ending: 'bad' })])
+    expect(records.map((r) => r.rowNumber)).toEqual([2, 3])
+    expect(issues[0].rowNumber).toBe(4)
+  })
+
   it('keeps a row whose week does not end on a Saturday but flags it', () => {
     const { records, issues } = normalizeRows([makeRow({ week_ending: '03/03/2025' })]) // a Monday
     expect(records).toHaveLength(1)
@@ -76,10 +92,37 @@ describe('normalizeRows', () => {
   })
 })
 
+describe('parseCsv', () => {
+  const [header, firstRow] = csvText.split('\n')
+
+  it('flags a row with more fields than the header', () => {
+    const { records, issues } = parseCsv(`${header}\n${firstRow},99`)
+    expect(records).toHaveLength(0)
+    expect(issues[0].rule).toBe('invalid-data')
+    expect(issues[0].message).toContain('Too many fields')
+  })
+})
+
 describe('parseCsv on the real data file', () => {
+  const { records, issues } = parseCsv(csvText)
+
   it('parses every row without data problems', () => {
-    const { records, issues } = parseCsv(csvText)
     expect(records).toHaveLength(263)
     expect(issues).toEqual([])
+  })
+
+  it('computes hours and pay for the first row (checked by hand)', () => {
+    // Ernestine Gerlach, 03/01/2025: ST 7.3+7.3+6.6+7.6+7.6 = 36.4, OT 2.2+1.2+1 = 4.4
+    const first = records[0]
+    expect(first.stHours).toBe(36.4)
+    expect(first.otHours).toBe(4.4)
+    expect(first.totalHours).toBe(40.8)
+    expect(first.grossPay).toBeCloseTo(36.4 * 27.05 + 4.4 * 40.58, 6) // 1163.172
+    expect(first.benefitsCost).toBeCloseTo(40.8 * 12.17, 6) // 496.536
+  })
+
+  it('rounds away float drift in hour totals', () => {
+    // Kamille O'Reilly, 03/01/2025: 35.2 ST + 5.7 OT. Unrounded addition gives 40.89999999999999.
+    expect(records[1].totalHours).toBe(40.9)
   })
 })
