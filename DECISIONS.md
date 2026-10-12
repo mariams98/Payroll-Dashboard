@@ -78,7 +78,8 @@ The data was profiled before choosing any thresholds:
 - Payroll totals reflect the data as submitted, including flagged rows. The dashboard shows how many rows are flagged, so the reader knows what might be off.
 - **Tradeoff:** excluding flagged rows would mean guessing what the correct values should be.
 
-## Benefits apply to all hours worked
+## Pay formulas, and benefits apply to all hours worked
+- Gross pay = ST hours × standard rate + OT hours × overtime rate. Total cost = gross pay + benefits.
 - The benefits cost is calculated as (standard hours + overtime hours) × the benefits rate.
 - This is an assumption to confirm (see QUESTIONS.md).
 
