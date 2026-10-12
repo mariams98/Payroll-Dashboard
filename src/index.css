@@ -184,7 +184,7 @@ td {
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: capitalize; /* "High", matching the filter chips, legend and rules panel */
 }
 
 .badge-high {
@@ -342,8 +342,10 @@ td.wrap {
   box-shadow: inset -1px 0 0 #e5e7eb;
 }
 
-th.sticky-col {
-  z-index: 3; /* the top-left corner stays above both sticky header and sticky column */
+/* The top-left header cells stay above both the sticky header row and the sticky column.
+   Needs this specificity to beat ".table-scroll thead th", which sets z-index 2. */
+.table-scroll thead th.sticky-col {
+  z-index: 3;
   background: #f9fafb;
 }
 

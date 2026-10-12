@@ -35,8 +35,10 @@ const COLUMNS: Column[] = [
 ]
 
 // Top header row that groups the min/avg/max columns. Spans must add up to COLUMNS.length.
+// The first cell sits above Name and is pinned with it, so group labels can't slide into that corner.
 const GROUPS = [
-  { label: '', span: 8 },
+  { label: '', span: 1 },
+  { label: '', span: 7 },
   { label: 'Hours per day worked', span: 3 },
   { label: 'Standard rate', span: 3 },
   { label: 'Overtime rate', span: 3 },
@@ -84,7 +86,11 @@ function EmployeeTable({ employees }: { employees: EmployeeStats[] }) {
         <thead>
           <tr>
             {GROUPS.map((group, i) => (
-              <th key={i} colSpan={group.span} className={i > 0 ? 'group-header group-start' : 'group-header'}>
+              <th
+                key={i}
+                colSpan={group.span}
+                className={i === 0 ? 'group-header sticky-col' : i === 1 ? 'group-header' : 'group-header group-start'}
+              >
                 {group.label}
               </th>
             ))}
