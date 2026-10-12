@@ -1,38 +1,30 @@
-# Questions for the project manager / client
+# Questions for the client
 
-Open questions that would change how the dashboard calculates or flags things. Updated as the work progresses.
+Ordered by how much the answer would change the dashboard.
 
-## Pay rates
-- How much week-to-week variation in an employee's pay rate is normal? (Currently anything more than 20% from their usual rate is flagged.)
-- Do rates legitimately change during a project, for example raises, apprentice step-ups, or prevailing-wage updates? If so, is there a list of approved effective dates?
-- Is overtime always 1.5× the standard rate? (It is in every row.) Are any hours paid at double time, such as Sundays or holidays?
-- Do benefits apply to overtime hours as well as standard hours? (The dashboard currently assumes yes.)
-- Does the dashboard need to match payroll to the cent? If so, how is pay rounded: per day, per week, or per pay line?
+## Highest impact
+- Is this file what was actually paid, or timesheets before payroll runs? Determines whether a flag is money lost or a fix still possible.
+- Do you review payroll weekly before it goes out? If so, the default view should be the latest week, not the whole project.
+- Is OT triggered daily (> 8 h) or weekly (> 40 h)? The data suggests daily.
+- Do rates change mid-project (raises, apprentice step-ups, prevailing-wage updates)? A list of approved changes would remove false positives from the rate rule.
+- Which flags should block payroll vs. just need a note? You should own the severity definitions.
 
-## Hours and overtime
-- Is overtime counted per day (over 8 hours) or per week (over 40 hours)? The data looks like daily overtime, because weeks over 40 standard hours are common.
-- Is a 7-day week of around 85 hours ever legitimate, for example during a deadline push or a shutdown?
-- Are 12-hour standard days with 7–8 hours of overtime on top a known data-entry pattern (for example hours keyed into the wrong column)?
-- What counts as suspiciously low hours for a week or a day?
+## Pay
+- What week-to-week rate variance is normal? We flag > 20%.
+- Is OT always 1.5×? Any double time (Sundays, holidays)?
+- Do benefits apply to OT hours? We assume yes.
+- Does this need to reconcile to the cent? If so, at what level is pay rounded?
+- Two Painters' rates dropped ~47% in the same week (04/19/2025). Known change, or a batch-entry error?
 
-## Apprentices
-- What apprentice-to-journeyworker ratios apply on this project, and do they apply per trade?
-- How are apprentice rates set: as a percentage of the journeyworker rate, by step or year?
+## Hours
+- Is an 85-hour, 7-day week ever legitimate (shutdowns, deadline pushes)?
+- Are 12 h ST + 8 h OT days a known entry pattern, e.g. hours keyed into the wrong column?
 
-## Identity and records
-- Is `employee_id` the source of truth when the name doesn't match?
-- Is "Deanna Wisozk" (ID 1021, week ending 05/03/2025) a different person entered under Zander Wisozk's ID?
-- Are missing weeks expected (time off, crew rotation), or could some timesheets be missing?
+## People and records
+- Is `employee_id` the source of truth when names disagree? Is "Deanna Wisozk" (ID 1021, 05/03/2025) a different person?
+- Are missing weeks expected, or could timesheets be missing?
+- What apprentice-to-journeyworker ratio rules apply, and per trade?
 
-## Using the dashboard
-- Should flagged rows be excluded from the payroll totals, or shown as-is? (They are currently included.)
-- Who acts on flagged rows, and what do they need: export, mark as reviewed, add a comment?
-- Will new payroll files arrive regularly, and should the dashboard keep history across uploads?
-- Do you review payroll weekly before it goes out? If so, should the dashboard default to the latest week instead of the whole project?
-- Is this file what was actually paid, or the timesheets before payroll runs? (It changes whether a flagged rate is money already lost or a mistake that can still be fixed.)
-- Which flags should stop payroll, and which only need a note? We'd like you to own the severity definitions.
-- When you say "average rate", do you mean what was actually paid per hour (weighted by hours) or the typical rate per person?
-- Who fixes flagged rows (you, a payroll admin, or the foreman), and do they need the CSV line numbers?
-
-## Patterns in this data
-- Two Painters' rates dropped about 47% in the same week (04/19/2025). Was there a known change or a batch entry that week?
+## Workflow
+- Who fixes flagged rows, and what do they need: CSV line numbers, export, mark-as-reviewed, comments?
+- Will new files arrive regularly, and should history persist across uploads?
