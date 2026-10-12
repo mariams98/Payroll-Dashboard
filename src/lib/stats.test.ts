@@ -13,6 +13,7 @@ describe('summarize on the real data file', () => {
 
   it('counts employees and weeks', () => {
     expect(summary.employeeCount).toBe(23)
+    expect(summary.timesheetCount).toBe(263)
     expect(summary.apprenticeCount).toBe(5)
     expect(summary.journeyworkerCount).toBe(18)
     expect(summary.weekCount).toBe(15)

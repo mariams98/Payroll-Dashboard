@@ -1,4 +1,4 @@
-import { formatDate, formatHours, formatMoney, formatPercent } from '../lib/format'
+import { formatHours, formatMoney, formatPercent } from '../lib/format'
 import type { AnomalySummary, Summary } from '../lib/stats'
 
 interface Props {
@@ -9,16 +9,20 @@ interface Props {
 interface Card {
   label: string
   value: string
-  detail: string
+  detail?: string
   alert?: boolean // highlight in red, e.g. when there are entries to review
   href?: string // makes the whole card a link
   help?: string // tooltip explaining how the number is calculated
 }
 
-// Shown as a tooltip on the rate cards.
-const RATE_HELP =
-  'Average = weighted by hours, i.e. what was actually paid per hour. ' +
-  "Typical = the median of each employee's usual rate, so one-off spike weeks don't move it."
+// Tooltip on the rate cards. The "typical" rate lives here rather than on the card,
+// so the card shows one number.
+function rateHelp(typicalRate: number): string {
+  return (
+    'Weighted by hours: what was actually paid per hour. ' +
+    `Typical employee: ${formatMoney(typicalRate)} (the median of each employee's usual rate).`
+  )
+}
 
 function CardGrid({ cards, primary = false }: { cards: Card[]; primary?: boolean }) {
   return (
@@ -29,7 +33,7 @@ function CardGrid({ cards, primary = false }: { cards: Card[]; primary?: boolean
           <>
             <div className="card-label">{card.label}</div>
             <div className="card-value">{card.value}</div>
-            <div className="card-detail">{card.detail}</div>
+            {card.detail && <div className="card-detail">{card.detail}</div>}
           </>
         )
         return card.href ? (
@@ -47,6 +51,12 @@ function CardGrid({ cards, primary = false }: { cards: Card[]; primary?: boolean
 }
 
 function SummaryCards({ summary, anomalySummary }: Props) {
+  // "15 high, 2 medium": only severities that actually occur.
+  const severityBreakdown = (['high', 'medium', 'low'] as const)
+    .filter((severity) => anomalySummary[severity] > 0)
+    .map((severity) => `${anomalySummary[severity]} ${severity}`)
+    .join(', ')
+
   // The two questions a project manager asks first: what did we spend, and is anything wrong?
   const primaryCards: Card[] = [
     {
@@ -59,9 +69,7 @@ function SummaryCards({ summary, anomalySummary }: Props) {
       // Each entry is one employee's week (one CSV row).
       label: 'Entries to review',
       value: String(anomalySummary.flaggedRows),
-      detail:
-        `${anomalySummary.high} high, ${anomalySummary.medium} medium, ${anomalySummary.low} low ` +
-        `across ${anomalySummary.flaggedEmployees} employees · View list ↓`,
+      detail: `${severityBreakdown} · ${anomalySummary.flaggedEmployees} employees · View list ↓`,
       alert: anomalySummary.flaggedRows > 0,
       href: '#entries',
     },
@@ -80,7 +88,6 @@ function SummaryCards({ summary, anomalySummary }: Props) {
         {
           label: 'Apprentice share of hours',
           value: formatPercent(summary.apprenticeShare),
-          detail: 'Hours worked by apprentices',
         },
       ],
     },
@@ -95,7 +102,7 @@ function SummaryCards({ summary, anomalySummary }: Props) {
         {
           label: 'Weeks covered',
           value: String(summary.weekCount),
-          detail: `${formatDate(summary.firstWeek)} – ${formatDate(summary.lastWeek)}`,
+          detail: `${summary.timesheetCount} timesheets`,
         },
       ],
     },
@@ -104,21 +111,18 @@ function SummaryCards({ summary, anomalySummary }: Props) {
       cards: [
         {
           label: 'Standard',
-          help: RATE_HELP,
+          help: rateHelp(summary.typicalStandardRate),
           value: formatMoney(summary.hoursWeightedStandardRate),
-          detail: `Typical ${formatMoney(summary.typicalStandardRate)}`,
         },
         {
           label: 'Overtime',
-          help: RATE_HELP,
+          help: rateHelp(summary.typicalOvertimeRate),
           value: formatMoney(summary.hoursWeightedOvertimeRate),
-          detail: `Typical ${formatMoney(summary.typicalOvertimeRate)}`,
         },
         {
           label: 'Benefits',
-          help: RATE_HELP,
+          help: rateHelp(summary.typicalBenefitsRate),
           value: formatMoney(summary.hoursWeightedBenefitsRate),
-          detail: `Typical ${formatMoney(summary.typicalBenefitsRate)}`,
         },
       ],
     },
@@ -137,8 +141,7 @@ function SummaryCards({ summary, anomalySummary }: Props) {
         ))}
       </div>
       <p className="note">
-        Totals include flagged entries. Average rates are weighted by hours (what was actually paid
-        per hour); "typical" is the median employee's usual rate.
+        Totals include flagged entries.
       </p>
     </>
   )

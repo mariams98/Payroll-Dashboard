@@ -5,6 +5,7 @@ import type { Anomaly, WeekRecord } from './types'
 
 export interface Summary {
   employeeCount: number
+  timesheetCount: number // one per CSV row: an employee's week
   apprenticeCount: number
   journeyworkerCount: number
   weekCount: number
@@ -95,6 +96,7 @@ export function summarize(records: WeekRecord[]): Summary {
 
   return {
     employeeCount: byEmployee.size,
+    timesheetCount: records.length,
     apprenticeCount: levels.filter((level) => level === 'APPRENTICE').length,
     journeyworkerCount: levels.filter((level) => level === 'JOURNEYWORKER').length,
     weekCount: weeks.length,

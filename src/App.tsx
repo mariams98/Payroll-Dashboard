@@ -49,8 +49,7 @@ function App() {
         <h1>Payroll Dashboard</h1>
         {data && data.recordCount > 0 && (
           <p className="subtitle">
-            Weekly payroll · {formatDate(data.summary.firstWeek)} – {formatDate(data.summary.lastWeek)} ·{' '}
-            {data.summary.employeeCount} employees · {data.recordCount} timesheets
+            Weekly payroll · {formatDate(data.summary.firstWeek)} – {formatDate(data.summary.lastWeek)}
           </p>
         )}
       </header>
@@ -88,10 +87,8 @@ function App() {
           {showRules && <FlagRules />}
           {(data.anomalySummary.costAboveUsualRates > 0 || data.anomalySummary.costBelowUsualRates > 0) && (
             <p className="impact">
-              Weeks with unusual pay rates cost about{' '}
-              <strong>{formatWholeMoney(data.anomalySummary.costAboveUsualRates)} more</strong> and{' '}
-              <strong>{formatWholeMoney(data.anomalySummary.costBelowUsualRates)} less</strong> than the
-              same hours at each employee's usual rates.
+              Unusual pay rates: <strong>{formatWholeMoney(data.anomalySummary.costAboveUsualRates)} more</strong>{' '}
+              and <strong>{formatWholeMoney(data.anomalySummary.costBelowUsualRates)} less</strong> than usual.
             </p>
           )}
           <p className="note">

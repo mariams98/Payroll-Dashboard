@@ -17,7 +17,7 @@ npm run build    # type-check + production build
 
 The page follows a project manager's questions in order: *what did we spend?*, *is anything wrong?*, *who should I look into?*
 
-1. **Summary:** total labor cost and entries to review first, then headcount, weeks covered, total hours, overtime and apprentice share of hours, and average standard, overtime and benefits rates (with the typical employee's rate alongside).
+1. **Summary:** total labor cost and entries to review first, then headcount, weeks covered, total hours, overtime and apprentice share of hours, and average standard, overtime and benefits rates (hover for the typical employee's rate).
 2. **Entries to review:** every flagged row, most severe first, filterable by severity. Each row lists its issues and, for pay-rate problems, the cost impact (+$2,897). Click a row for the full explanation, for example *"Standard rate $88.57 is 131% above Kamille O'Reilly's typical $38.34"*, plus that week's hours by day, its rates and the CSV line. A "How entries are flagged" panel lists every rule and threshold.
 3. **Employees:** a sortable table, opening with the most-flagged employees first. It shows the min, average and max hours per day worked and each rate (standard, overtime, benefits).
 

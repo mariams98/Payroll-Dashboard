@@ -54,7 +54,7 @@ The data was profiled before choosing any thresholds:
 
 ## Median, not mean, for the "typical" rate
 - An employee's baseline rate is the **median** of their weekly rates. A single spike (for example +131%) would drag the mean toward itself and partly hide the spike.
-- The dashboard's "Typical employee" rates use the median of the per-employee medians for the same reason. They are shown beside the hours-weighted averages (see "Which 'average' each number uses").
+- The dashboard's "Typical employee" rates use the median of the per-employee medians for the same reason. They appear in the tooltip on each rate card, next to the hours-weighted average (see "Which 'average' each number uses").
 - **Employees with fewer than 3 weeks are skipped** by the rate check. With only $40 and $100, the median is $70 and both weeks would be flagged, including the correct one.
 - **Limitation: a legitimate mid-project raise confuses the median.** With 8 weeks at $40 and 6 at $50, the median is $40 and all six $50 weeks get flagged. With 7 and 7, the median is $45 and nothing is flagged. Every employee in this data has one constant rate apart from the spikes, so this doesn't happen here. Handling raises properly needs the client's list of approved rate changes (see QUESTIONS.md), or a baseline based on the previous few weeks instead of the whole project.
 
@@ -76,6 +76,7 @@ The data was profiled before choosing any thresholds:
 - **Employee table:** the header and Name column stay in place while scrolling, because it has 20 columns and is wider than a laptop screen. Divider lines separate the hours, standard, overtime and benefits groups.
 - **Secondary stats are grouped** under Workforce / Hours / Average rates, so related numbers sit together.
 
+- **Text was trimmed to what helps a decision.** Each number appears once (the date range is in the subtitle, the timesheet count on the Weeks card), severity counts list only the levels that occur, labels aren't repeated as descriptions, and the median "typical" rate moved into the rate cards' tooltips so each card shows one number. The only footnote left is "Totals include flagged entries", because it changes how the cost should be read.
 ## Employee table: plain averages, with flags alongside
 - The min / avg / max rate columns use the plain mean, as the brief asks for "average". A spike week does pull an employee's average up or down, but that is visible: the min or max column shows the outlier, and the "Flagged weeks" column shows that the employee has flagged weeks.
 - The "typical" rates on the summary cards use medians instead, because they describe the whole crew.
@@ -84,7 +85,7 @@ The data was profiled before choosing any thresholds:
 
 ## Which "average" each number uses
 - **Summary "Average standard / overtime / benefits rate"** ($41.59 / $62.72 / $16.20) are weighted by hours: pay ÷ hours (ST pay ÷ ST hours, OT pay ÷ OT hours, benefits ÷ all hours). They are what was actually paid per hour, so a spot-check with a spreadsheet matches. These are the headline numbers because the brief asks for "average wage rates and benefits rates".
-- **"Typical employee"** under each average ($43.41 / $65.11 / $16.25) is the median of each employee's median rate. It describes a typical worker and ignores spike weeks.
+- **"Typical employee"** ($43.41 / $65.11 / $16.25), shown in each rate card's tooltip, is the median of each employee's median rate. It describes a typical worker and ignores spike weeks.
 - The two differ because the typical rate counts each employee once, regardless of how many hours they worked. For comparison, the plain average of all 263 weekly standard rates is $41.68.
 - **Employee table "Avg" rate** is the unweighted mean of that employee's weekly rates, **including** flagged weeks.
 - **Employee table "Avg" hours per day** is the mean over days actually worked, with each worked day counting equally.
