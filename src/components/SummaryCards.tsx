@@ -31,6 +31,12 @@ function CardGrid({ cards, primary = false }: { cards: Card[]; primary?: boolean
         const className = ['card', card.alert && 'card-alert', card.href && 'card-link'].filter(Boolean).join(' ')
         const content = (
           <>
+            {/* Visible "this goes somewhere" cue that doesn't rely on hover; decorative for screen readers. */}
+            {card.href && (
+              <span className="card-chevron" aria-hidden="true">
+                ›
+              </span>
+            )}
             <div className="card-label">{card.label}</div>
             <div className="card-value">{card.value}</div>
             {card.detail && <div className="card-detail">{card.detail}</div>}
