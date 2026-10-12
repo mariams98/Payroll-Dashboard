@@ -69,7 +69,7 @@ function SummaryCards({ summary, anomalySummary }: Props) {
       // Each entry is one employee's week (one CSV row).
       label: 'Entries to review',
       value: String(anomalySummary.flaggedRows),
-      detail: `${severityBreakdown} · ${anomalySummary.flaggedEmployees} employees · View list ↓`,
+      detail: `${severityBreakdown} · ${anomalySummary.flaggedEmployees} employees`,
       alert: anomalySummary.flaggedRows > 0,
       href: '#entries',
     },
