@@ -76,6 +76,7 @@ The data was profiled before choosing any thresholds:
 - **Employee table:** the header and Name column stay in place while scrolling, because it has 20 columns and is wider than a laptop screen. Divider lines separate the hours, standard, overtime and benefits groups.
 - **Secondary stats are grouped** under Workforce / Hours / Average rates, so related numbers sit together.
 
+- **"Download CSV" link in the header.** Expanded entries point to "line N of the CSV file"; without the file that reference is a dead end. It also lets reviewers check the numbers themselves.
 - **Two summary cards are shortcuts:** "Entries to review" jumps to the entries list and "Employees" jumps to the employee table, so the page order stays Summary → Entries → Employees while the table is still one click away. They are marked as clickable without relying on hover (which touch screens don't have): a › chevron in the top-right corner and a faint shadow, while the plain stat cards stay flat.
 - **Text was trimmed to what helps a decision.** Each number appears once (the date range is in the subtitle, the timesheet count on the Weeks card), severity counts list only the levels that occur, labels aren't repeated as descriptions, and the median "typical" rate moved into the rate cards' tooltips so each card shows one number. The only footnote left is "Totals include flagged entries", because it changes how the cost should be read.
 ## Employee table: plain averages, with flags alongside

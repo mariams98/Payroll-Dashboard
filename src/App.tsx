@@ -49,7 +49,11 @@ function App() {
         <h1>Payroll Dashboard</h1>
         {data && data.recordCount > 0 && (
           <p className="subtitle">
-            Weekly payroll · {formatDate(data.summary.firstWeek)} – {formatDate(data.summary.lastWeek)}
+            Weekly payroll · {formatDate(data.summary.firstWeek)} – {formatDate(data.summary.lastWeek)} ·{' '}
+            {/* The source file, so the "line N of the CSV file" references in entries can be looked up. */}
+            <a href={`${import.meta.env.BASE_URL}payroll_data.csv`} download>
+              Download CSV
+            </a>
           </p>
         )}
       </header>

@@ -24,6 +24,10 @@ h1 {
   color: #6b7280;
 }
 
+.subtitle a {
+  color: #1d4ed8;
+}
+
 /* Hidden on screen but still read by screen readers. */
 .visually-hidden {
   position: absolute;
