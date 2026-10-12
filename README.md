@@ -13,6 +13,8 @@ npm test         # unit tests (Vitest)
 npm run build    # type-check + production build
 ```
 
+The dashboard loads `public/payroll_data.csv`. Use **Upload CSV** in the header to analyze another file with the same columns; **Download CSV** gets the source file, so the "line N" references in flagged entries can be looked up.
+
 ## What's on the dashboard
 
 The page follows a project manager's questions in order: *what did we spend?*, *is anything wrong?*, *who should I look into?*
@@ -65,8 +67,11 @@ Full reasoning and known limitations: **[DECISIONS.md](DECISIONS.md)**. Question
 
 ## What I'd do next
 
-- **Employee drill-down:** week-by-week hours, rates and pay, with flagged weeks highlighted.
-- **Filters on the anomaly table** by severity and rule, plus a "mark as reviewed" state.
-- **CSV upload.** `parseCsv(text)` already accepts any text.
-- **Charts:** weekly labor cost over time, and hours by trade.
-- **A rate baseline that handles legitimate mid-project raises,** then deploy as a static site.
+- **A "this week" view.** The project manager checks payroll weekly before it goes out, so default to the latest week instead of the whole project.
+- **"This week vs usual" table for pay-rate entries:** standard, overtime and benefits rates side by side with the employee's usual rates and the cost difference.
+- **Pattern hints across employees:** both Painters' rates dropped about 47% in the same week (04/19/2025), which points to one batch-entry error rather than two.
+- **A "mark as reviewed" state and comments** on entries, persisted with a small backend, plus history across uploads.
+- **A rate baseline that handles approved mid-project raises,** and a check that overtime is about 1.5× the standard rate.
+- **Clearer upload errors:** one "missing column" message instead of an error on every row.
+- **Employee drill-down, charts** (weekly labor cost, hours by trade), **a phone layout** for the entries table, and **deployment** as a static site.
+- **Why the overtime and benefits columns stay in the employee table:** they mostly mirror the standard rate (overtime is always 1.5×), but the brief asks for min/avg/max of all three. With more time I'd collapse them behind a toggle.

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { ChangeEvent } from 'react'
 import AnomalyTable from './components/AnomalyTable'
 import EmployeeTable from './components/EmployeeTable'
 import FlagRules from './components/FlagRules'
@@ -10,6 +11,9 @@ import { employeeStats, summarize, summarizeAnomalies } from './lib/stats'
 
 function App() {
   const [csvText, setCsvText] = useState<string | null>(null)
+  const [sampleText, setSampleText] = useState<string | null>(null) // the bundled CSV, for "Reset"
+  const [uploadedName, setUploadedName] = useState<string | null>(null) // null = showing the sample
+  const [fileVersion, setFileVersion] = useState(0) // bumps on every load to reset table state
   const [loadError, setLoadError] = useState<string | null>(null)
   const [showRules, setShowRules] = useState(false) // the "How are entries flagged?" panel
 
@@ -20,9 +24,29 @@ function App() {
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         return response.text()
       })
-      .then(setCsvText)
+      .then((text) => {
+        setSampleText(text)
+        setCsvText(text)
+      })
       .catch((error: Error) => setLoadError(`Could not load payroll data: ${error.message}`))
   }, [])
+
+  // Upload: read the chosen file as text and run it through the same pipeline as the sample.
+  async function handleUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setCsvText(await file.text())
+    setUploadedName(file.name)
+    setLoadError(null)
+    setFileVersion(fileVersion + 1)
+    event.target.value = '' // so choosing the same file again still triggers a change
+  }
+
+  function resetToSample() {
+    setCsvText(sampleText)
+    setUploadedName(null)
+    setFileVersion(fileVersion + 1)
+  }
 
   // All calculations happen once per file, in the pure functions under src/lib.
   const data = useMemo(() => {
@@ -47,15 +71,32 @@ function App() {
     <main>
       <header className="page-header">
         <h1>Payroll Dashboard</h1>
-        {data && data.recordCount > 0 && (
-          <p className="subtitle">
-            Weekly payroll · {formatDate(data.summary.firstWeek)} – {formatDate(data.summary.lastWeek)} ·{' '}
-            {/* The source file, so the "line N of the CSV file" references in entries can be looked up. */}
+        {/* Shown even when a file has no valid rows, so the user can always upload again or reset. */}
+        <p className="subtitle">
+          {data && data.recordCount > 0 && (
+            <>
+              Weekly payroll · {formatDate(data.summary.firstWeek)} – {formatDate(data.summary.lastWeek)} ·{' '}
+            </>
+          )}
+          {uploadedName === null ? (
+            // The source file, so the "line N of the CSV file" references in entries can be looked up.
             <a href={`${import.meta.env.BASE_URL}payroll_data.csv`} download>
               Download CSV
             </a>
-          </p>
-        )}
+          ) : (
+            <>
+              Showing <strong>{uploadedName}</strong> ·{' '}
+              <button type="button" className="link-button" onClick={resetToSample}>
+                Reset to sample data
+              </button>
+            </>
+          )}{' '}
+          ·{' '}
+          <label className="upload-link">
+            Upload CSV
+            <input type="file" accept=".csv,text/csv" className="visually-hidden" onChange={handleUpload} />
+          </label>
+        </p>
       </header>
       {loadError && <p className="error">{loadError}</p>}
       {!loadError && data === null && <p>Loading payroll data…</p>}
@@ -99,13 +140,13 @@ function App() {
             <strong>High</strong> = check before payroll goes out · <strong>Medium</strong> = likely a
             data-entry mistake · <strong>Low</strong> = worth a glance
           </p>
-          <AnomalyTable rows={data.flaggedRows} />
+          <AnomalyTable key={fileVersion} rows={data.flaggedRows} />
         </section>
       )}
       {data && data.recordCount > 0 && (
         <section id="employees">
           <h2>Employees</h2>
-          <EmployeeTable employees={data.employees} />
+          <EmployeeTable key={fileVersion} employees={data.employees} />
         </section>
       )}
     </main>

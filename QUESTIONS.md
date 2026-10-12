@@ -28,3 +28,11 @@ Open questions that would change how the dashboard calculates or flags things. U
 - Should flagged rows be excluded from the payroll totals, or shown as-is? (They are currently included.)
 - Who acts on flagged rows, and what do they need: export, mark as reviewed, add a comment?
 - Will new payroll files arrive regularly, and should the dashboard keep history across uploads?
+- Do you review payroll weekly before it goes out? If so, should the dashboard default to the latest week instead of the whole project?
+- Is this file what was actually paid, or the timesheets before payroll runs? (It changes whether a flagged rate is money already lost or a mistake that can still be fixed.)
+- Which flags should stop payroll, and which only need a note? We'd like you to own the severity definitions.
+- When you say "average rate", do you mean what was actually paid per hour (weighted by hours) or the typical rate per person?
+- Who fixes flagged rows (you, a payroll admin, or the foreman), and do they need the CSV line numbers?
+
+## Patterns in this data
+- Two Painters' rates dropped about 47% in the same week (04/19/2025). Was there a known change or a batch entry that week?
